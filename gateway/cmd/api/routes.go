@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	jsoncodec "github.com/orduro/pos-microservices/pkg/json"
 )
 
 func getMux() *chi.Mux {
@@ -44,8 +44,9 @@ func getMux() *chi.Mux {
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(map[string]any{
+	data := map[string]any{
 		"health":    "alive",
 		"timestamp": time.Now().Local(),
-	})
+	}
+	jsoncodec.Write(w, http.StatusOK, data)
 }
