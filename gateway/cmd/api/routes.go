@@ -10,7 +10,7 @@ import (
 	jsoncodec "github.com/orduro/pos-microservices/pkg/json"
 )
 
-func getMux() *chi.Mux {
+func (app *application) mount() *chi.Mux {
 	r := chi.NewRouter()
 
 	// Basic CORS
