@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	jsoncodec "github.com/orduro/pos-microservices/pkg/json"
+	json "github.com/orduro/common/json"
 )
 
 type Handler struct {
@@ -31,5 +31,5 @@ func (h *Handler) Check(w http.ResponseWriter, r *http.Request) {
 		Environment: h.env,
 		Timestamp:   time.Now().Local(),
 	}
-	jsoncodec.Write(w, http.StatusOK, data)
+	json.Write(w, http.StatusOK, data)
 }
