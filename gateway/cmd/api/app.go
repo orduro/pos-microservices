@@ -14,14 +14,14 @@ type application struct {
 
 func (app *application) serve(mux *chi.Mux) error {
 	srv := &http.Server{
-		Addr:         app.config.addr,
+		Addr:         app.config.Addr,
 		Handler:      mux,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("gateway server is listening on port %s\n", app.config.addr)
+	log.Printf("gateway server is listening on port %s\n", app.config.Addr)
 
 	return srv.ListenAndServe()
 }

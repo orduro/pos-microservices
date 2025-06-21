@@ -1,21 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
 )
 
 type config struct {
-	addr string
-	env  string
+	Addr string `validate:"required"`
+	Env  string `validate:"required"`
 }
 
-func NewConfig() *config {
+func NewConfig() (*config, error) {
 	cfg := config{
-		addr: os.Getenv("SERVER_ADDR"),
-		env:  os.Getenv("ENVIRONMENT"),
+		Addr: os.Getenv("SERVER_ADDR"),
+		Env:  os.Getenv("ENVIRONMENT"),
 	}
 
-	return &cfg
+	v := validator.New()
+	if err := v.Struct(cfg); err != nil {
+		return nil, fmt.Errorf("config validation failed: %w", err)
+	}
+
+	return &cfg, nil
 }
