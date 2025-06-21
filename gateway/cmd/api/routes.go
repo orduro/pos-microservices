@@ -1,16 +1,18 @@
 package main
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	jsoncodec "github.com/orduro/pos-microservices/pkg/json"
+	"github.com/orduro/pos-microservices/gateway/internal/handler/health"
 )
 
 func (app *application) mount() *chi.Mux {
+	// initialise handlers
+	healthhandler := health.New(app.config.Env)
+
 	r := chi.NewRouter()
 
 	// Basic CORS
@@ -37,21 +39,8 @@ func (app *application) mount() *chi.Mux {
 
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
-		r.Get("/health", app.healthCheckHandler)
+		r.Get("/health", healthhandler.Check)
 	})
 
 	return r
-}
-
-func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	data := struct {
-		Health      string    `json:"health"`
-		Environment string    `json:"environment"`
-		Timestamp   time.Time `json:"timestamp"`
-	}{
-		Health:      "alive",
-		Environment: app.config.Env,
-		Timestamp:   time.Now().Local(),
-	}
-	jsoncodec.Write(w, http.StatusOK, data)
 }
