@@ -37,16 +37,21 @@ func (app *application) mount() *chi.Mux {
 
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
-		r.Get("/health", healthCheckHandler)
+		r.Get("/health", app.healthCheckHandler)
 	})
 
 	return r
 }
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	data := map[string]any{
-		"health":    "alive",
-		"timestamp": time.Now().Local(),
+func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		Health      string    `json:"health"`
+		Environment string    `json:"environment"`
+		Timestamp   time.Time `json:"timestamp"`
+	}{
+		Health:      "alive",
+		Environment: app.config.env,
+		Timestamp:   time.Now().Local(),
 	}
 	jsoncodec.Write(w, http.StatusOK, data)
 }

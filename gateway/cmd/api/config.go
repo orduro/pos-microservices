@@ -1,5 +1,11 @@
 package main
 
+import (
+	"os"
+
+	_ "github.com/joho/godotenv/autoload"
+)
+
 type config struct {
 	addr string
 	env  string
@@ -7,8 +13,8 @@ type config struct {
 
 func NewConfig() *config {
 	cfg := config{
-		addr: ":8080",
-		env:  "dev",
+		addr: os.Getenv("SERVER_ADDR"),
+		env:  os.Getenv("ENVIRONMENT"),
 	}
 
 	return &cfg
