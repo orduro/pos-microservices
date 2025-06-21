@@ -1,0 +1,14 @@
+services:
+  gateway:
+    image: gateway:latest
+    container_name: gateway-dev
+    build:
+      context: ./gateway/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./gateway:/app
+    environment:
+      - SERVER_ADDR=:8080
+      - ENVIRONMENT=development
+    ports:
+      - "8080:8080"
