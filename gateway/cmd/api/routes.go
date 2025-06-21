@@ -50,7 +50,7 @@ func (app *application) healthCheckHandler(w http.ResponseWriter, r *http.Reques
 		Timestamp   time.Time `json:"timestamp"`
 	}{
 		Health:      "alive",
-		Environment: app.config.env,
+		Environment: app.config.Env,
 		Timestamp:   time.Now().Local(),
 	}
 	jsoncodec.Write(w, http.StatusOK, data)
