@@ -1,8 +1,8 @@
-## Describe your changes
+# #[Issue Number]
 
-## Issue ticket number and link
+## Description
 
-Closes #[issue-number]
+Describe your changes
 
 ## Checklist before requesting a review
 
