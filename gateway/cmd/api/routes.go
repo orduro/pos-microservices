@@ -7,6 +7,8 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/orduro/pos-microservices/gateway/internal/handler/health"
+
+	"github.com/swaggo/http-swagger/v2"
 )
 
 func (app *application) mount() *chi.Mux {
@@ -36,6 +38,8 @@ func (app *application) mount() *chi.Mux {
 	// through ctx.Done() that the request has timed out and further
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
