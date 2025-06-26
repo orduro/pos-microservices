@@ -22,7 +22,7 @@ services:
     volumes:
       - ./venue:/app
     environment:
-      - SERVER_ADDR=:8081
+      - SERVER_PORT=:8081
       - ENVIRONMENT=dev
     ports:
       - "8081:8081"
