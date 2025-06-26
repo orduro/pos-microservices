@@ -12,3 +12,17 @@ services:
       - ENVIRONMENT=development
     ports:
       - "8080:8080"
+
+  venue-service:
+    image: venue-service:latest
+    container_name: venue-service-dev
+    build:
+      context: ./venue/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./venue:/app
+    environment:
+      - SERVER_ADDR=:8081
+      - ENVIRONMENT=development
+    ports:
+      - "8081:8081"
