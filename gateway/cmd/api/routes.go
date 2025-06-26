@@ -56,7 +56,7 @@ func (app *application) mount() *chi.Mux {
 func (app *application) getCORSOptions() cors.Options {
 	var allowedOrigins []string
 
-	switch strings.ToLower(app.config.Env) {
+	switch app.config.Env {
 	case "dev", "development":
 		// allow any origins for dev
 		allowedOrigins = []string{"*"}

@@ -29,7 +29,11 @@ func (app *application) mount() *chi.Mux {
 	// 	MaxAge:           300, // Maximum value not ignored by any of major browsers
 	// }))
 
-	r.Use(cors.Handler(app.getCORSOptions()))
+	// only add cors in development mode
+	if app.config.Env == "dev" || app.config.Env == "development" {
+		r.Use(cors.Handler(app.getCORSOptions()))
+	}
+
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
@@ -51,7 +55,7 @@ func (app *application) mount() *chi.Mux {
 func (app *application) getCORSOptions() cors.Options {
 	var allowedOrigins []string
 
-	switch strings.ToLower(app.config.Env) {
+	switch app.config.Env {
 	case "dev", "development":
 		// allow any origins for dev
 		allowedOrigins = []string{"*"}
