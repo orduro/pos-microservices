@@ -26,7 +26,7 @@ func New(env string) *Handler {
 
 func (h *Handler) Check(w http.ResponseWriter, r *http.Request) {
 	data := &Health{
-		Service:     "venue-management-service",
+		Service:     "venue-service",
 		Health:      "alive",
 		Environment: h.env,
 		Timestamp:   time.Now().Local(),
