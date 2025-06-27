@@ -13,14 +13,14 @@ services:
     ports:
       - "8080:8080"
 
-  venue-service:
-    image: venue-service:latest
-    container_name: venue-service-dev
+  venue-management-service:
+    image: venue-management-service:latest
+    container_name: venue-management-service-dev
     build:
-      context: ./venue/
+      context: ./venue-management-service/
       dockerfile: Dockerfile.dev
     volumes:
-      - ./venue:/app
+      - ./venue-management-service:/app
     environment:
       - SERVER_PORT=:8081
       - ENVIRONMENT=dev
