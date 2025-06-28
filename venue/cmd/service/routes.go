@@ -16,22 +16,38 @@ func (app *application) mount() *chi.Mux {
 	healthhandler := health.New(app.config.Env)
 	r := chi.NewRouter()
 
-	// Basic CORS
-	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
-	// r.Use(cors.Handler(cors.Options{
-	// 	// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-	// 	AllowedOrigins: []string{"https://*", "http://*"},
-	// 	// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-	// 	AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	// 	AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-	// 	ExposedHeaders:   []string{"Link"},
-	// 	AllowCredentials: true,
-	// 	MaxAge:           300, // Maximum value not ignored by any of major browsers
-	// }))
-
 	// only add cors in development mode
 	if app.config.Env == "dev" || app.config.Env == "development" {
-		r.Use(cors.Handler(app.getCORSOptions()))
+
+		var allowedOrigins []string
+
+		switch app.config.Env {
+		case "dev", "development":
+			allowedOrigins = []string{"*"}
+
+		case "staging", "prod", "production":
+			originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
+
+			if originsEnv != "" {
+				allowedOrigins = strings.Split(originsEnv, ",")
+			}
+
+		default:
+			allowedOrigins = []string{"http://localhost:3000"}
+		}
+
+		// Basic CORS
+		// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+		r.Use(cors.Handler(cors.Options{
+			// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+			AllowedOrigins: allowedOrigins,
+			// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+			ExposedHeaders:   []string{"Link"},
+			AllowCredentials: true,
+			MaxAge:           300, // Maximum value not ignored by any of major browsers
+		}))
 	}
 
 	r.Use(middleware.RequestID)
@@ -50,43 +66,4 @@ func (app *application) mount() *chi.Mux {
 	})
 
 	return r
-}
-
-func (app *application) getCORSOptions() cors.Options {
-	var allowedOrigins []string
-
-	switch app.config.Env {
-	case "dev", "development":
-		// allow any origins for dev
-		allowedOrigins = []string{"*"}
-
-	case "staging":
-		// get allowed origins from .env
-		originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
-
-		if originsEnv != "" {
-			allowedOrigins = strings.Split(originsEnv, ",")
-		}
-
-	case "prod", "production":
-		// get allowed origins from .env
-		originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
-
-		if originsEnv != "" {
-			allowedOrigins = strings.Split(originsEnv, ",")
-		}
-
-	default:
-		// default to localhost for unknown environments
-		allowedOrigins = []string{"http://localhost:3000"}
-	}
-
-	return cors.Options{
-		AllowedOrigins:   allowedOrigins,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-		ExposedHeaders:   []string{"Link"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}
 }
