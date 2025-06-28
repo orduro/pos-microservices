@@ -8,20 +8,20 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-type application struct {
+type server struct {
 	config *config
 }
 
-func (app *application) serve(mux *chi.Mux) error {
+func (s *server) serve(mux *chi.Mux) error {
 	srv := &http.Server{
-		Addr:         app.config.Addr,
+		Addr:         s.config.Addr,
 		Handler:      mux,
 		ReadTimeout:  time.Second * 10,
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("venue service is listening on port %s\n", app.config.Addr)
+	log.Printf("gateway server is listening on port %s\n", s.config.Addr)
 
 	return srv.ListenAndServe()
 }
