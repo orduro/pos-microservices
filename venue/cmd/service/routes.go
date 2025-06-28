@@ -16,39 +16,18 @@ func (app *application) mount() *chi.Mux {
 	healthhandler := health.New(app.config.Env)
 	r := chi.NewRouter()
 
-	// only add cors in development mode
-	if app.config.Env == "dev" || app.config.Env == "development" {
-
-		var allowedOrigins []string
-
-		switch app.config.Env {
-		case "dev", "development":
-			allowedOrigins = []string{"*"}
-
-		case "staging", "prod", "production":
-			originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
-
-			if originsEnv != "" {
-				allowedOrigins = strings.Split(originsEnv, ",")
-			}
-
-		default:
-			allowedOrigins = []string{"http://localhost:3000"}
-		}
-
-		// Basic CORS
-		// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
-		r.Use(cors.Handler(cors.Options{
-			// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-			AllowedOrigins: allowedOrigins,
-			// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
-			AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-			AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-			ExposedHeaders:   []string{"Link"},
-			AllowCredentials: true,
-			MaxAge:           300, // Maximum value not ignored by any of major browsers
-		}))
-	}
+	// Basic CORS
+	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
+	r.Use(cors.Handler(cors.Options{
+		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: app.getAllowedOrigins(),
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -66,4 +45,28 @@ func (app *application) mount() *chi.Mux {
 	})
 
 	return r
+}
+
+func (app *application) getAllowedOrigins() []string {
+	switch app.config.Env {
+	case "dev", "development":
+		return []string{"*"}
+
+	case "staging", "prod", "production":
+		originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
+
+		if originsEnv != "" {
+			origins := strings.Split(originsEnv, ",")
+
+			for i, origin := range origins {
+				origins[i] = strings.TrimSpace(origin)
+			}
+
+			return origins
+		}
+		return []string{}
+
+	default:
+		return []string{"*"}
+	}
 }
