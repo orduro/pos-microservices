@@ -21,7 +21,7 @@ func (app *application) serve(mux *chi.Mux) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("Venue service is listening on port %s\n", app.config.Addr)
+	log.Printf("venue service is listening on port %s\n", app.config.Addr)
 
 	return srv.ListenAndServe()
 }
