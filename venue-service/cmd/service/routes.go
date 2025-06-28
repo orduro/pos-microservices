@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -18,7 +20,7 @@ func (app *application) mount() *chi.Mux {
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
 	r.Use(cors.Handler(cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
-		AllowedOrigins: []string{"https://*", "http://*"},
+		AllowedOrigins: app.getAllowedOrigins(),
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
@@ -26,6 +28,7 @@ func (app *application) mount() *chi.Mux {
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
+  
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
@@ -42,4 +45,28 @@ func (app *application) mount() *chi.Mux {
 	})
 
 	return r
+}
+
+func (app *application) getAllowedOrigins() []string {
+	switch app.config.Env {
+	case "dev", "development":
+		return []string{"*"}
+
+	case "staging", "prod", "production":
+		originsEnv := os.Getenv("CORS_ALLOWED_ORIGINS")
+
+		if originsEnv != "" {
+			origins := strings.Split(originsEnv, ",")
+
+			for i, origin := range origins {
+				origins[i] = strings.TrimSpace(origin)
+			}
+
+			return origins
+		}
+		return []string{}
+
+	default:
+		return []string{"*"}
+	}
 }

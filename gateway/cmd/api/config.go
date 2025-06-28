@@ -10,7 +10,7 @@ import (
 
 type config struct {
 	Addr string `validate:"required"`
-	Env  string `validate:"required"`
+	Env  string `validate:"required,oneof=dev development staging prod production"`
 }
 
 func NewConfig() (*config, error) {
