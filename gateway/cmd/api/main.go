@@ -21,7 +21,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := &application{
+	app := &server{
 		config: cfg,
 	}
 
