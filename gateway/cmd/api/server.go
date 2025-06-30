@@ -21,7 +21,7 @@ func (s *server) serve(mux *chi.Mux) error {
 		IdleTimeout:  time.Minute,
 	}
 
-	log.Printf("gateway server is listening on port %s\n", s.config.Addr)
+	log.Printf("server is listening on port %s\n", s.config.Addr)
 
 	return srv.ListenAndServe()
 }

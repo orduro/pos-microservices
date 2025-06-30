@@ -21,13 +21,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	app := &server{
+	srv := &server{
 		config: cfg,
 	}
 
 	// routes using chi router (routes.go)
-	mux := app.mount()
+	mux := srv.mount()
 
 	// start server
-	log.Fatal(app.serve(mux))
+	log.Fatal(srv.serve(mux))
 }
