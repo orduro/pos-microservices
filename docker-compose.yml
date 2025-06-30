@@ -24,8 +24,6 @@ services:
     environment:
       - SERVER_PORT=:8081
       - ENVIRONMENT=dev
-      - DB_HOST=venue-service-postgres
-      - DB_PORT=5432
       - DB_USER=root
       - DB_PASSWORD=toor
       - DB_NAME=venue_service_db
