@@ -10,6 +10,7 @@ services:
     environment:
       - SERVER_ADDR=:8080
       - ENVIRONMENT=dev
+      - CORS_ALLOWED_ORIGINS=*
     ports:
       - "8080:8080"
 
@@ -24,6 +25,7 @@ services:
     environment:
       - SERVER_PORT=:8081
       - ENVIRONMENT=dev
+      - CORS_ALLOWED_ORIGINS=*
 
       # PostgreSQL Configuration
       - POSTGRES_DSN=postgres://root:toor@venue-service-postgres:5432/venue_service_db?sslmode=disable

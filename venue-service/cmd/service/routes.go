@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -18,7 +19,7 @@ func (s *server) mount() *chi.Mux {
 
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
-	r.Use(cors.Handler(cors.Options{
+	corsOptions := cors.Options{
 		// AllowedOrigins:   []string{"https://foo.com"}, // Use this to allow specific origin hosts
 		AllowedOrigins: s.getAllowedOrigins(),
 		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
@@ -27,7 +28,13 @@ func (s *server) mount() *chi.Mux {
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
-	}))
+	}
+
+	// log cors config on startup
+	s.logCORSSettings(corsOptions)
+
+	// apply cors middleware
+	r.Use(cors.Handler(corsOptions))
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
@@ -45,6 +52,17 @@ func (s *server) mount() *chi.Mux {
 	})
 
 	return r
+}
+
+func (s *server) logCORSSettings(options cors.Options) {
+	fmt.Printf("=== VENUE SERVICE CORS CONFIGURATION ===\n")
+	fmt.Printf("Environment: %s\n", s.config.Env)
+	fmt.Printf("Allowed Origins: %v\n", options.AllowedOrigins)
+	fmt.Printf("Allowed Methods: %v\n", options.AllowedMethods)
+	fmt.Printf("Allowed Headers: %v\n", options.AllowedHeaders)
+	fmt.Printf("Exposed Headers: %v\n", options.ExposedHeaders)
+	fmt.Printf("Allow Credentials: %t\n", options.AllowCredentials)
+	fmt.Printf("========================================\n")
 }
 
 func (s *server) getAllowedOrigins() []string {
@@ -70,4 +88,3 @@ func (s *server) getAllowedOrigins() []string {
 		return []string{"*"}
 	}
 }
-
