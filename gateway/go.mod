@@ -7,7 +7,7 @@ require (
 	github.com/go-chi/cors v1.2.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/joho/godotenv v1.5.1
-	github.com/orduro/common v0.0.0-20250621184954-dd23075765cf
+	github.com/orduro/common v0.1.0
 	github.com/swaggo/http-swagger/v2 v2.0.2
 	github.com/swaggo/swag v1.16.4
 )
