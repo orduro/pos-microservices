@@ -9,11 +9,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/orduro/pos-microservices/venue/internal/handler/health"
+	"github.com/orduro/pos-microservices/venue/internal/handler/venue"
 )
 
 func (s *server) mount() *chi.Mux {
 	// initialise handlers
 	healthhandler := health.New(s.config.Env)
+	venuehandler := venue.New(s.store)
 	r := chi.NewRouter()
 
 	// Basic CORS
@@ -42,6 +44,11 @@ func (s *server) mount() *chi.Mux {
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", healthhandler.Check)
+
+		// routes for /venue
+		r.Route("/venue", func(r chi.Router) {
+			r.Post("/", venuehandler.CreateVenue)
+		})
 	})
 
 	return r
@@ -70,4 +77,3 @@ func (s *server) getAllowedOrigins() []string {
 		return []string{"*"}
 	}
 }
-
