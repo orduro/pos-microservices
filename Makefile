@@ -1,5 +1,7 @@
 # Venue Postgres connection string
-VENUE_POSTGRES_DSN = postgres://root:toor@venue-service-postgres:5432/venue_service_db?sslmode=disable
+# Currently using localhost for local development and db migration
+# Make sure to change DSN when migrating on actual deployed db
+VENUE_POSTGRES_DSN = postgres://root:toor@localhost:5432/venue_service_db?sslmode=disable
 
 # venue db migrate up
 venue-db-up:
