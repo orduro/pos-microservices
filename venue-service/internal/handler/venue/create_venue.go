@@ -21,7 +21,8 @@ func (h *Handler) CreateVenue(w http.ResponseWriter, r *http.Request) {
 
 	// validate venue
 	if err := store.ValidateVenue(&venue); err != nil {
-		json.WriteError(w, r, http.StatusBadRequest, err.Error())
+		json.WriteError(w, r, http.StatusBadRequest, "failed to validate venue")
+		log.Printf("failed to validate venue: %v", err)
 		return
 	}
 
