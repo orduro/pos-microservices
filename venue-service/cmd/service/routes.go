@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -55,14 +55,14 @@ func (s *server) mount() *chi.Mux {
 }
 
 func (s *server) logCORSSettings(options cors.Options) {
-	fmt.Printf("=== VENUE SERVICE CORS CONFIGURATION ===\n")
-	fmt.Printf("Environment: %s\n", s.config.Env)
-	fmt.Printf("Allowed Origins: %v\n", options.AllowedOrigins)
-	fmt.Printf("Allowed Methods: %v\n", options.AllowedMethods)
-	fmt.Printf("Allowed Headers: %v\n", options.AllowedHeaders)
-	fmt.Printf("Exposed Headers: %v\n", options.ExposedHeaders)
-	fmt.Printf("Allow Credentials: %t\n", options.AllowCredentials)
-	fmt.Printf("========================================\n")
+	log.Printf("=== VENUE SERVICE CORS CONFIGURATION ===\n")
+	log.Printf("Environment: %s\n", s.config.Env)
+	log.Printf("Allowed Origins: %v\n", options.AllowedOrigins)
+	log.Printf("Allowed Methods: %v\n", options.AllowedMethods)
+	log.Printf("Allowed Headers: %v\n", options.AllowedHeaders)
+	log.Printf("Exposed Headers: %v\n", options.ExposedHeaders)
+	log.Printf("Allow Credentials: %t\n", options.AllowCredentials)
+	log.Printf("========================================\n")
 }
 
 func (s *server) getAllowedOrigins() []string {
