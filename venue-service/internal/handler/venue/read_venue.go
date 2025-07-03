@@ -2,6 +2,7 @@ package venue
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -17,6 +18,7 @@ func (h *Handler) GetVenueByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(urlID, 10, 64)
 	if err != nil {
 		json.WriteError(w, r, http.StatusBadRequest, fmt.Sprintf("cannot parse venue id: %v", urlID))
+		log.Printf("cannot parse venue id %v", urlID)
 		return
 	}
 
@@ -24,6 +26,8 @@ func (h *Handler) GetVenueByID(w http.ResponseWriter, r *http.Request) {
 	venue, err := h.store.Venues.GetByID(r.Context(), id)
 	if err != nil {
 		json.WriteError(w, r, http.StatusInternalServerError, fmt.Sprintf("cannot find venue with id: %v", id))
+		log.Printf("cannot find venue with id: %v", id)
+		return
 	}
 
 	// write response
