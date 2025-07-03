@@ -45,3 +45,31 @@ func (s *VenueStore) Create(ctx context.Context, venue *Venue) error {
 	}
 	return nil
 }
+
+func (s *VenueStore) GetByID(ctx context.Context, id int64) (*Venue, error) {
+	query := `
+	SELECT id, name, address, phone, venue_type, description, archived, created_at, updated_at
+	FROM venues
+	WHERE id = $1
+	`
+
+	v := Venue{}
+
+	err := s.db.QueryRowContext(ctx, query, id).Scan(
+		&v.ID,
+		&v.Name,
+		&v.Address,
+		&v.Phone,
+		&v.VenueType,
+		&v.Description,
+		&v.Archived,
+		&v.CreatedAt,
+		&v.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &v, nil
+}
