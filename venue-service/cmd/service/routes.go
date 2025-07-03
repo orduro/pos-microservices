@@ -55,6 +55,7 @@ func (s *server) mount() *chi.Mux {
 		// routes for /venue
 		r.Route("/venue", func(r chi.Router) {
 			r.Post("/", venuehandler.CreateVenue)
+			r.Get("/{id}", venuehandler.GetVenueByID)
 		})
 	})
 
