@@ -6,7 +6,7 @@ FROM golang:1.24.4-alpine
 WORKDIR /app
 
 # Install air and required packages for development
-RUN apk add --no-cache curl \
+RUN apk add --no-cache curl git \
     && go install github.com/air-verse/air@latest
 
 # Add GOPATH/bin to PATH to ensure air is accessible

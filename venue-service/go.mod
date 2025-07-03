@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/orduro/common v0.0.0-20250621184954-dd23075765cf
+	github.com/orduro/common v0.1.0
 )
 
 require (

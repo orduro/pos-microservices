@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/orduro/pos-microservices/venue/internal/database"
+	"github.com/orduro/pos-microservices/venue/internal/store"
 )
 
 func main() {
@@ -13,6 +14,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// connect to postgres db
 	pgconn, err := database.NewPostgresPool(cfg.Postgres.DSN, cfg.Postgres.MaxOpenConns, cfg.Postgres.MaxIdleConns, cfg.Postgres.MaxIdleTime)
 	if err != nil {
 		log.Fatal(err)
@@ -20,8 +22,11 @@ func main() {
 	defer pgconn.Close()
 	log.Println("postgres database connection pool established")
 
+	store := store.NewStore(pgconn)
+
 	srv := &server{
 		config: cfg,
+		store:  store,
 	}
 
 	// routes using chi router (routes.go)
