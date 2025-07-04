@@ -61,6 +61,11 @@ func (s *server) mount() *chi.Mux {
 			r.Route("/archive", func(r chi.Router) {
 				r.Put("/{id}", venuehandler.ArchiveVenue)
 			})
+
+			// routes for venue deletes `/venue/delete`
+			r.Route("/delete", func(r chi.Router) {
+				r.Delete("/{id}", venuehandler.DeleteVenue)
+			})
 		})
 	})
 
