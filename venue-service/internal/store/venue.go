@@ -73,3 +73,18 @@ func (s *VenueStore) GetByID(ctx context.Context, id int64) (*Venue, error) {
 
 	return &v, nil
 }
+
+func (s *VenueStore) Archive(ctx context.Context, id int64) error {
+	query := `
+	UPDATE venues
+	SET archived = true
+	WHERE id = $1 AND archived = false
+	`
+
+	_, err := s.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
