@@ -20,4 +20,6 @@ func NewStore(postgres *sql.DB) Store {
 type VenueRepository interface {
 	Create(ctx context.Context, venue *Venue) error
 	GetByID(ctx context.Context, id int64) (*Venue, error)
+	Archive(ctx context.Context, id int64) error
+	Delete(ctx context.Context, id int64) error
 }

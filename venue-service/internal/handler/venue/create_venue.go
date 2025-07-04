@@ -1,6 +1,7 @@
 package venue
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -28,9 +29,15 @@ func (h *Handler) CreateVenue(w http.ResponseWriter, r *http.Request) {
 
 	// create venue
 	if err := h.store.Venues.Create(r.Context(), &venue); err != nil {
-		json.WriteError(w, r, http.StatusInternalServerError, "failed to create venue")
-		log.Printf("failed to create venue: %v", err)
-		return
+		switch {
+		case errors.Is(err, store.ErrVenueDuplicate):
+			json.WriteError(w, r, http.StatusConflict, "venue with this name and address already exists")
+			return
+		default:
+			json.WriteError(w, r, http.StatusInternalServerError, "failed to create venue")
+			log.Printf("failed to create venue: %v", err)
+			return
+		}
 	}
 
 	json.Write(w, http.StatusCreated, venue)
