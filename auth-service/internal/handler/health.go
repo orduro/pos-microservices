@@ -1,4 +1,4 @@
-package health
+package handler
 
 import (
 	"net/http"
@@ -14,7 +14,7 @@ type Health struct {
 	Timestamp   time.Time `json:"timestamp"`
 }
 
-func (h *Handler) Check(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Healthcheck(w http.ResponseWriter, r *http.Request) {
 	data := &Health{
 		Service:     "auth-service",
 		Health:      "alive",

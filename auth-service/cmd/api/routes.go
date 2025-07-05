@@ -9,12 +9,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/orduro/pos-microservices/auth-service/internal/handler/health"
+	"github.com/orduro/pos-microservices/auth-service/internal/handler"
 )
 
 func (s *server) mount() *chi.Mux {
-	// initialise handlers
-	healthhandler := health.New(s.config.Env)
+	// initialise handler
+	handler := handler.New(s.config.Env)
 
 	r := chi.NewRouter()
 
@@ -49,7 +49,7 @@ func (s *server) mount() *chi.Mux {
 
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
-		r.Get("/health", healthhandler.Check)
+		r.Get("/health", handler.Healthcheck)
 	})
 
 	return r

@@ -1,4 +1,4 @@
-package health
+package handler
 
 type Handler struct {
 	env string
