@@ -37,6 +37,21 @@ services:
     depends_on:
       - venue-service-postgres
 
+  auth-service:
+    image: auth-service:latest
+    container_name: auth-service-dev
+    build:
+      context: ./auth-service/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./auth-service:/app
+    environment:
+      - SERVER_ADDR=:8082
+      - ENVIRONMENT=dev
+      - CORS_ALLOWED_ORIGINS=*
+    ports:
+      - "8082:8082"
+
   venue-service-postgres:
     image: postgres:latest
     container_name: venue-service-postgres
