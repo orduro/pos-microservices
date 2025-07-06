@@ -5,6 +5,9 @@ import "net/http"
 // create user
 func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {}
 
+// verify user (send email)
+func (h *Handler) Verify(w http.ResponseWriter, r *http.Request) {}
+
 // get JWT token
 func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {}
 
