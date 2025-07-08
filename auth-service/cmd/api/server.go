@@ -6,10 +6,12 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/orduro/pos-microservices/auth-service/internal/store"
 )
 
 type server struct {
 	config *config
+	store  store.Store
 }
 
 func (s *server) serve(mux *chi.Mux) error {
