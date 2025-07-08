@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/orduro/pos-microservices/auth-service/internal/database"
+	"github.com/orduro/pos-microservices/auth-service/internal/store"
 )
 
 func main() {
@@ -21,8 +22,11 @@ func main() {
 	defer pgconn.Close()
 	log.Println("postgres database connection pool established")
 
+	store := store.NewStore(pgconn)
+
 	srv := &server{
 		config: cfg,
+		store:  store,
 	}
 
 	// routes using chi router (routes.go)

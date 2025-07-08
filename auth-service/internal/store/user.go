@@ -4,18 +4,29 @@ import (
 	"context"
 	"database/sql"
 	"time"
+
+	"github.com/orduro/pos-microservices/auth-service/internal/database"
 )
 
+type UserRegistrationDetails struct {
+	Email    string `json:"email" validate:"required,email,max=255"`
+	Password string `json:"password" validate:"required,min=8,max=128"`
+}
+
+func (u *UserRegistrationDetails) Validate() error {
+	return v.Struct(u)
+}
+
 type User struct {
-	ID           int64
-	Email        string
-	PasswordHash string
-	FirstName    string
-	LastName     string
-	LastLoginAt  time.Time
-	IsVerified   bool
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	ID           int64     `json:"id"`
+	Email        string    `json:"email"`
+	PasswordHash string    `json:"-"`
+	FirstName    string    `json:"first_name"`
+	LastName     string    `json:"last_name"`
+	LastLoginAt  time.Time `json:"last_login_at"`
+	IsVerified   bool      `json:"is_verified"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type UserStore struct {
@@ -23,8 +34,109 @@ type UserStore struct {
 }
 
 func (s *UserStore) Create(ctx context.Context, user *User) error {
+	query := `
+		INSERT INTO users (email, password_hash, first_name, last_name, is_verified)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, created_at, updated_at
+	`
+	args := []any{user.Email, user.PasswordHash, user.FirstName, user.LastName, user.IsVerified}
+
+	err := s.db.QueryRowContext(ctx, query, args...).Scan(
+		&user.ID,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		// Check if it's a unique constraint violation for email
+		if database.IsPostgresUniqueConstraintError(err, "email") {
+			return ErrUserExists
+		}
+		return err
+	}
+
 	return nil
 }
 func (s *UserStore) GetById(ctx context.Context, id int64) (*User, error) {
-	return nil, nil
+	query := `
+		SELECT id, email, password_hash, first_name, last_name, last_login_at, is_verified, created_at, updated_at
+		FROM users
+		WHERE id = $1
+	`
+
+	user := &User{}
+	err := s.db.QueryRowContext(ctx, query, id).Scan(
+		&user.ID,
+		&user.Email,
+		&user.PasswordHash,
+		&user.FirstName,
+		&user.LastName,
+		&user.LastLoginAt,
+		&user.IsVerified,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
+	query := `
+		SELECT id, email, password_hash, first_name, last_name, last_login_at, is_verified, created_at, updated_at
+		FROM users
+		WHERE email = $1
+	`
+
+	user := &User{}
+	err := s.db.QueryRowContext(ctx, query, email).Scan(
+		&user.ID,
+		&user.Email,
+		&user.PasswordHash,
+		&user.FirstName,
+		&user.LastName,
+		&user.LastLoginAt,
+		&user.IsVerified,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *UserStore) MarkAsVerified(ctx context.Context, userID int64) error {
+	query := `
+		UPDATE users 
+		SET is_verified = true, updated_at = NOW()
+		WHERE id = $1 AND is_verified = false
+	`
+
+	result, err := s.db.ExecContext(ctx, query, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
 }

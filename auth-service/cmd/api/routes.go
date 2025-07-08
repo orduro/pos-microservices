@@ -14,7 +14,7 @@ import (
 
 func (s *server) mount() *chi.Mux {
 	// initialise handler
-	handler := handler.New(s.config.Env)
+	handler := handler.New(s.config.Env, s.config.BaseURL, s.store)
 
 	r := chi.NewRouter()
 
@@ -50,6 +50,7 @@ func (s *server) mount() *chi.Mux {
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/health", handler.Healthcheck)
+		r.Post("/register", handler.RegisterUser)
 	})
 
 	return r

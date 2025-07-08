@@ -10,6 +10,7 @@ import (
 type config struct {
 	Addr     string        `envconfig:"SERVER_PORT" validate:"required"`
 	Env      string        `envconfig:"ENVIRONMENT" validate:"required,oneof=dev development staging prod production"`
+	BaseURL  string        `envconfig:"BASE_URL" validate:"required,url"`
 	Postgres *postgresConf `validate:"required"`
 }
 
@@ -34,4 +35,3 @@ func NewConfig() (*config, error) {
 
 	return &cfg, nil
 }
-
