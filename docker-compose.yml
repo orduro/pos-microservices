@@ -60,6 +60,23 @@ services:
     depends_on:
       - auth-service-postgres
 
+  email-service:
+      image: email-service:latest
+      container_name: email-service-dev
+      build:
+        context: ./email-service/
+        dockerfile: Dockerfile.dev
+      volumes:
+        - ./email-service:/app
+      env_file:
+        - ./email-service/.env
+      environment:
+        - SERVER_PORT=:8083
+        - ENVIRONMENT=dev
+        - CORS_ALLOWED_ORIGINS=*
+      ports:
+        - "8083:8083"
+
   auth-service-postgres:
     image: postgres:latest
     container_name: auth-service-postgres
