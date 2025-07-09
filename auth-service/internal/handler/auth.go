@@ -101,14 +101,22 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		log.Printf("failed to create email request: %v", err)
 	}
 
-	// send the http request
 	r.Header.Set("Content-Type", "application/json")
+
+	// send the http request
 	client := &http.Client{}
 	resp, err := client.Do(r)
 	if err != nil {
-		log.Printf("failed to send verification email: %v", err)
-	} else {
-		defer resp.Body.Close()
+		json.WriteError(w, r, http.StatusInternalServerError, "failed to send verification email")
+		log.Printf("failed to call communication service to send verification email: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		json.WriteError(w, r, http.StatusInternalServerError, "failed to send verification email")
+		log.Printf("communication service response code: %v", resp.StatusCode)
+		return
 	}
 
 	json.Write(w, http.StatusCreated, map[string]any{
