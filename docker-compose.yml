@@ -49,7 +49,6 @@ services:
       - SERVER_PORT=:8082
       - ENVIRONMENT=dev
       - BASE_URL=http://localhost:8082
-      - CORS_ALLOWED_ORIGINS=*
 
       # PostgreSQL Configuration
       - POSTGRES_DSN=postgres://root:toor@auth-service-postgres:5432/auth_service_db?sslmode=disable
