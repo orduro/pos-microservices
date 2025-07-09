@@ -4,7 +4,6 @@ go 1.24.4
 
 require (
 	github.com/go-chi/chi/v5 v5.2.2
-	github.com/go-chi/cors v1.2.1
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/orduro/common v0.1.0
