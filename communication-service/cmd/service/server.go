@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/orduro/pos-microservices/email-service/internal/store"
+	"github.com/orduro/pos-microservices/communication-service/internal/store"
 )
 
 type server struct {

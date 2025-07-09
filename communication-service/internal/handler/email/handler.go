@@ -1,7 +1,7 @@
 package email
 
 import (
-	"github.com/orduro/pos-microservices/email-service/internal/store"
+	"github.com/orduro/pos-microservices/communication-service/internal/store"
 )
 
 type Handler struct {

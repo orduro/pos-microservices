@@ -7,8 +7,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors" // CORS IMPORT - REMOVE FOR PRODUCTION
-	"github.com/orduro/pos-microservices/email-service/internal/handler/email"
-	"github.com/orduro/pos-microservices/email-service/internal/handler/health"
+	"github.com/orduro/pos-microservices/communication-service/internal/handler/email"
+	"github.com/orduro/pos-microservices/communication-service/internal/handler/health"
 )
 
 func (s *server) mount() *chi.Mux {

@@ -1,4 +1,4 @@
-module github.com/orduro/pos-microservices/email-service
+module github.com/orduro/pos-microservices/communication-service
 
 go 1.24.4
 

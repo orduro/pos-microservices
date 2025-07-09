@@ -16,7 +16,7 @@ type Health struct {
 
 func (h *Handler) Check(w http.ResponseWriter, r *http.Request) {
 	data := &Health{
-		Service:     "email-service",
+		Service:     "communication-service",
 		Health:      "alive",
 		Environment: h.env,
 		Timestamp:   time.Now().Local(),

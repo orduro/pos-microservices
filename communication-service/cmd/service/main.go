@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/orduro/pos-microservices/email-service/internal/store"
+	"github.com/orduro/pos-microservices/communication-service/internal/store"
 )
 
 func main() {

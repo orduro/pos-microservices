@@ -61,16 +61,16 @@ services:
     depends_on:
       - auth-service-postgres
 
-  email-service:
-    image: email-service:latest
-    container_name: email-service-dev
+  communication-service:
+    image: communication-service:latest
+    container_name: communication-service-dev
     build:
-      context: ./email-service/
+      context: ./communication-service/
       dockerfile: Dockerfile.dev
     volumes:
-      - ./email-service:/app
+      - ./communication-service:/app
     env_file:
-      - ./email-service/.env
+      - ./communication-service/.env
     ports:
       - "8083:8083"
 

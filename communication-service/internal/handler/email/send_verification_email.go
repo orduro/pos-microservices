@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/orduro/common/json"
-	"github.com/orduro/pos-microservices/email-service/internal/store"
+	"github.com/orduro/pos-microservices/communication-service/internal/store"
 )
 
 type VerificationEmailRequest struct {
