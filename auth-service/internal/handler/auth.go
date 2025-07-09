@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -87,10 +88,28 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 
 	// generate verification link to verify with current token
 	verificationLink := fmt.Sprintf("%s/api/verify?token=%s", h.baseURL, token)
-	log.Printf("generated link: %v", verificationLink)
 
-	// TODO: send email via communication service (currently using placeholder URL)
-	// send verification link + user email
+	postURL := "http://communication-service-dev:8083/api/email/verification"
+	postBody := []byte(fmt.Sprintf(`{
+		"email": "%s",
+		"verification_url": "%s"
+	}`, registrationDetails.Email, verificationLink))
+
+	// create a HTTP post request to communication service to send email
+	r, err = http.NewRequest("POST", postURL, bytes.NewBuffer(postBody))
+	if err != nil {
+		log.Printf("failed to create email request: %v", err)
+	}
+
+	// send the http request
+	r.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	resp, err := client.Do(r)
+	if err != nil {
+		log.Printf("failed to send verification email: %v", err)
+	} else {
+		defer resp.Body.Close()
+	}
 
 	json.Write(w, http.StatusCreated, map[string]any{
 		"message": "User registered successfully. Please check your email for verification instructions.",
