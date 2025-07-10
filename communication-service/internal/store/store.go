@@ -12,7 +12,7 @@ func NewStore(emailConfig EmailConfig) Store {
 
 type EmailRepository interface {
 	SendEmail(req EmailRequest) (*EmailResponse, error)
-	SendVerificationEmail(to, username, verificationURL string) error
+	SendVerificationEmail(to, verificationURL string) error
 	SendPasswordResetEmail(to, username, resetURL string) error
 	SendWelcomeEmail(to, username string) error
 }

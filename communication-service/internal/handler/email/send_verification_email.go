@@ -11,7 +11,6 @@ import (
 
 type VerificationEmailRequest struct {
 	Email           string `json:"email"`
-	Username        string `json:"username"`
 	VerificationURL string `json:"verification_url"`
 }
 
@@ -27,15 +26,11 @@ func (h *Handler) SendVerificationEmail(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// send verification email
-	err = h.store.Email.SendVerificationEmail(req.Email, req.Username, req.VerificationURL)
+	err = h.store.Email.SendVerificationEmail(req.Email, req.VerificationURL)
 	if err != nil {
 		switch {
 		case errors.Is(err, store.ErrEmailInvalid):
 			json.WriteError(w, r, http.StatusBadRequest, "invalid email format")
-			return
-
-		case errors.Is(err, store.ErrUsernameRequired):
-			json.WriteError(w, r, http.StatusBadRequest, "username is required")
 			return
 
 		case errors.Is(err, store.ErrVerificationURLRequired):
