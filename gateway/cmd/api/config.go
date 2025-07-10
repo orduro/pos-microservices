@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type config struct {
@@ -14,9 +14,10 @@ type config struct {
 }
 
 func NewConfig() (*config, error) {
-	cfg := config{
-		Addr: os.Getenv("SERVER_ADDR"),
-		Env:  os.Getenv("ENVIRONMENT"),
+	var cfg config
+
+	if err := envconfig.Process("", &cfg); err != nil {
+		return nil, fmt.Errorf("failed to load config from environment: %w", err)
 	}
 
 	v := validator.New()
