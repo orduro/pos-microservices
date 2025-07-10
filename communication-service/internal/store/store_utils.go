@@ -30,7 +30,6 @@ type EmailValidationRequest struct {
 
 type VerificationEmailRequest struct {
 	Email           string `validate:"required,email"`
-	Username        string `validate:"required,min=1,max=100"`
 	VerificationURL string `validate:"required,url"`
 }
 
@@ -86,10 +85,9 @@ func ValidateEmailRequest(req EmailRequest) error {
 	return nil
 }
 
-func ValidateVerificationEmailRequest(email, username, verificationURL string) error {
+func ValidateVerificationEmailRequest(email, verificationURL string) error {
 	req := VerificationEmailRequest{
 		Email:           email,
-		Username:        username,
 		VerificationURL: verificationURL,
 	}
 
@@ -99,9 +97,6 @@ func ValidateVerificationEmailRequest(email, username, verificationURL string) e
 				switch validationErr.Field() {
 				case "Email":
 					return ErrEmailInvalid
-
-				case "Username":
-					return ErrUsernameRequired
 
 				case "VerificationURL":
 					return ErrVerificationURLRequired
