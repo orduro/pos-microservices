@@ -73,7 +73,11 @@ func NewEmailStore(config EmailConfig) EmailRepository {
 
 // send email using gomail
 func (s *EmailStore) SendEmail(req EmailRequest) (*EmailResponse, error) {
+	log.Printf("[Send Email] Starting to send %s email to: %v", req.EmailType, req.To)
+
 	if err := ValidateEmailRequest(req); err != nil {
+		log.Printf("[Send Email] Validation failed for %s email: %v", req.EmailType, err)
+
 		return &EmailResponse{
 			Success: false,
 			Error:   err.Error(),
@@ -87,6 +91,8 @@ func (s *EmailStore) SendEmail(req EmailRequest) (*EmailResponse, error) {
 	if s.config.Provider == "simulate" {
 		return s.simulateEmail(req)
 	}
+
+	log.Printf("[Send Email] Sending via SMTP (Provider: %s, Host: %s)", s.config.Provider, s.config.SMTPHost)
 
 	// create email message
 	m := gomail.NewMessage()
@@ -104,8 +110,13 @@ func (s *EmailStore) SendEmail(req EmailRequest) (*EmailResponse, error) {
 		m.SetBody("text/plain", req.Body)
 	}
 
+	startTime := time.Now()
+
 	// send email
 	if err := s.dialer.DialAndSend(m); err != nil {
+		duration := time.Since(startTime)
+		log.Printf("[Send Email] Failed to send %s email to %v after %v: %v", req.EmailType, req.To, duration, err)
+
 		return &EmailResponse{
 			Success: false,
 			Error:   err.Error(),
@@ -113,9 +124,13 @@ func (s *EmailStore) SendEmail(req EmailRequest) (*EmailResponse, error) {
 		}, err
 	}
 
+	duration := time.Since(startTime)
+	messageID := fmt.Sprintf("gomail_%d", time.Now().Unix())
+	log.Printf("[Send Email] Successfully sent %s email to %v in %v (MessageID: %s)", req.EmailType, req.To, duration, messageID)
+
 	return &EmailResponse{
 		Success:   true,
-		MessageID: fmt.Sprintf("gomail_%d", time.Now().Unix()),
+		MessageID: messageID,
 		SentAt:    time.Now(),
 	}, nil
 }
@@ -141,28 +156,38 @@ func (s *EmailStore) isHTML(content string) bool {
 }
 
 // send verification email
-func (s *EmailStore) SendVerificationEmail(to, username, verificationURL string) error {
-	if err := ValidateVerificationEmailRequest(to, username, verificationURL); err != nil {
+func (s *EmailStore) SendVerificationEmail(to, verificationURL string) error {
+	log.Printf("[Verification] Preparing verification email for: %s", to)
+
+	if err := ValidateVerificationEmailRequest(to, verificationURL); err != nil {
+		log.Printf("[Verification] Validation failed for %s: %v", to, err)
 		return err
 	}
 
-	username = SanitiseString(username)
 	verificationURL = SanitiseString(verificationURL)
 
 	req := EmailRequest{
 		To:        []string{to},
 		Subject:   "Verify your email address",
-		Body:      fmt.Sprintf(`<h1>Welcome %s!</h1><p>Please verify your email by clicking <a href="%s">here</a></p>`, username, verificationURL),
+		Body:      fmt.Sprintf(`<h1>Welcome!</h1><p>Please verify your email by clicking <a href="%s">here</a></p>`, verificationURL),
 		EmailType: EmailTypeVerification,
 	}
 
 	_, err := s.SendEmail(req)
+	if err != nil {
+		log.Printf("[Verification] Failed to send verification email to %s: %v", to, err)
+	} else {
+		log.Printf("[Verification] Verification email queued successfully for %s", to)
+	}
 	return err
 }
 
 // send password reset email
 func (s *EmailStore) SendPasswordResetEmail(to, username, resetURL string) error {
+	log.Printf("[Password Reset] Preparing password reset email for: %s (username: %s)", to, username)
+
 	if err := ValidatePasswordResetEmailRequest(to, username, resetURL); err != nil {
+		log.Printf("[Password Reset] Validation failed for %s: %v", to, err)
 		return err
 	}
 
@@ -177,12 +202,20 @@ func (s *EmailStore) SendPasswordResetEmail(to, username, resetURL string) error
 	}
 
 	_, err := s.SendEmail(req)
+	if err != nil {
+		log.Printf("[Password Reset] Failed to send password reset email to %s: %v", to, err)
+	} else {
+		log.Printf("[Password Reset] Password reset email queued successfully for %s", to)
+	}
 	return err
 }
 
 // send welcome email
 func (s *EmailStore) SendWelcomeEmail(to, username string) error {
+	log.Printf("[Welcome] Preparing welcome email for: %s (username: %s)", to, username)
+
 	if err := ValidateWelcomeEmailRequest(to, username); err != nil {
+		log.Printf("[Welcome] Validation failed for %s: %v", to, err)
 		return err
 	}
 
@@ -196,5 +229,10 @@ func (s *EmailStore) SendWelcomeEmail(to, username string) error {
 	}
 
 	_, err := s.SendEmail(req)
+	if err != nil {
+		log.Printf("[Welcome] Failed to send welcome email to %s: %v", to, err)
+	} else {
+		log.Printf("[Welcome] Welcome email queued successfully for %s", to)
+	}
 	return err
 }
