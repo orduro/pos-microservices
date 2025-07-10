@@ -1,7 +1,7 @@
+// auth-service/internal/handler/register_user.go
 package handler
 
 import (
-	"bytes"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -16,7 +16,7 @@ import (
 )
 
 func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
-	// recieve user registration details
+	// receive user registration details
 	registrationDetails := store.UserRegistrationDetails{}
 	if err := json.Read(r, &registrationDetails); err != nil {
 		json.WriteError(w, r, http.StatusBadRequest, "unable to read registration details")
@@ -87,35 +87,13 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// generate verification link to verify with current token
-	verificationLink := fmt.Sprintf("%s/api/verify?token=%s", h.baseURL, token)
+	verificationLink := fmt.Sprintf("%s/api/verification?token=%s", h.baseURL, token)
 
-	postURL := "http://communication-service-dev:8083/api/email/verification"
-	postBody := []byte(fmt.Sprintf(`{
-		"email": "%s",
-		"verification_url": "%s"
-	}`, registrationDetails.Email, verificationLink))
-
-	// create a HTTP post request to communication service to send email
-	r, err = http.NewRequest("POST", postURL, bytes.NewBuffer(postBody))
-	if err != nil {
-		log.Printf("failed to create email request: %v", err)
-	}
-
-	r.Header.Set("Content-Type", "application/json")
-
-	// send the http request
-	client := &http.Client{}
-	resp, err := client.Do(r)
+	// send verification email using HTTP client
+	err = h.httpClient.SendVerificationEmail(r.Context(), registrationDetails.Email, verificationLink)
 	if err != nil {
 		json.WriteError(w, r, http.StatusInternalServerError, "failed to send verification email")
-		log.Printf("failed to call communication service to send verification email: %v", err)
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		json.WriteError(w, r, http.StatusInternalServerError, "failed to send verification email")
-		log.Printf("communication service response code: %v", resp.StatusCode)
+		log.Printf("failed to send verification email: %v", err)
 		return
 	}
 

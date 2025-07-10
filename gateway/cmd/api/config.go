@@ -2,21 +2,22 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/go-playground/validator/v10"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/kelseyhightower/envconfig"
 )
 
 type config struct {
-	Addr string `validate:"required"`
-	Env  string `validate:"required,oneof=dev development staging prod production"`
+	Addr string `envconfig:"SERVER_ADDR" validate:"required"`
+	Env  string `envconfig:"ENVIRONMENT" validate:"required,oneof=dev development staging prod production"`
 }
 
 func NewConfig() (*config, error) {
-	cfg := config{
-		Addr: os.Getenv("SERVER_ADDR"),
-		Env:  os.Getenv("ENVIRONMENT"),
+	var cfg config
+
+	if err := envconfig.Process("", &cfg); err != nil {
+		return nil, fmt.Errorf("failed to load config from environment: %w", err)
 	}
 
 	v := validator.New()

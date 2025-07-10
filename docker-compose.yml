@@ -26,7 +26,7 @@ services:
       - SERVER_PORT=:8081
       - ENVIRONMENT=dev
 
-      # PostgreSQL Configuration
+      # PostgreSQL configuration
       - POSTGRES_DSN=postgres://root:toor@venue-service-postgres:5432/venue_service_db?sslmode=disable
       - POSTGRES_MAX_OPEN_CONNS=25
       - POSTGRES_MAX_IDLE_CONNS=25
@@ -47,13 +47,16 @@ services:
     environment:
       - SERVER_PORT=:8082
       - ENVIRONMENT=dev
-      - BASE_URL=http://localhost:8082
 
-      # PostgreSQL Configuration
+      # PostgreSQL configuration
       - POSTGRES_DSN=postgres://root:toor@auth-service-postgres:5432/auth_service_db?sslmode=disable
       - POSTGRES_MAX_OPEN_CONNS=25
       - POSTGRES_MAX_IDLE_CONNS=25
       - POSTGRES_MAX_IDLE_TIME=15m
+
+      # Services configuration
+      - BASE_URL=http://localhost:8082
+      - COMMUNICATION_SERVICE_URL=http://communication-service-dev:8083
     ports:
       - "8082:8082"
     depends_on:

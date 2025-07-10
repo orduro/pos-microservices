@@ -10,8 +10,8 @@ import (
 type config struct {
 	Addr     string        `envconfig:"SERVER_PORT" validate:"required"`
 	Env      string        `envconfig:"ENVIRONMENT" validate:"required,oneof=dev development staging prod production"`
-	BaseURL  string        `envconfig:"BASE_URL" validate:"required,url"`
 	Postgres *postgresConf `validate:"required"`
+	Services *servicesConf `validate:"required"`
 }
 
 type postgresConf struct {
@@ -19,6 +19,11 @@ type postgresConf struct {
 	MaxOpenConns int           `envconfig:"POSTGRES_MAX_OPEN_CONNS" validate:"required,min=1"`
 	MaxIdleConns int           `envconfig:"POSTGRES_MAX_IDLE_CONNS" validate:"required,min=0"`
 	MaxIdleTime  time.Duration `envconfig:"POSTGRES_MAX_IDLE_TIME" validate:"required"`
+}
+
+type servicesConf struct {
+	BaseURL                 string `envconfig:"BASE_URL" validate:"required,url"`
+	CommunicationServiceURL string `envconfig:"COMMUNICATION_SERVICE_URL" validate:"required"`
 }
 
 func NewConfig() (*config, error) {
