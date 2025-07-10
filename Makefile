@@ -19,7 +19,10 @@ auth-db-down:
 # Migrate all databases up
 db-up: venue-db-up auth-db-up
 
-# Migrate all databases down  
+# Migrate all databases down
 db-down: venue-db-down auth-db-down
 
-.PHONY: venue-db-up venue-db-down auth-db-up auth-db-down db-up db-down
+# reset db
+db-reset: db-down db-up
+
+.PHONY: venue-db-up venue-db-down auth-db-up auth-db-down db-up db-down db-reset
