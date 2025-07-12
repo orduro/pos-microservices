@@ -143,3 +143,84 @@ func (s *VenueStore) Delete(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (s *VenueStore) Update(ctx context.Context, venue *Venue) error {
+	query := `
+	UPDATE venues 
+	SET name = $2, address = $3, phone = $4, venue_type = $5, description = $6, updated_at = CURRENT_TIMESTAMP
+	WHERE id = $1 AND archived = false
+	RETURNING updated_at
+	`
+	args := []any{venue.ID, venue.Name, venue.Address, venue.Phone, venue.VenueType, venue.Description}
+
+	err := s.db.QueryRowContext(ctx, query, args...).Scan(&venue.UpdatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// check if venue exists at all
+			var exists bool
+			var archived bool
+
+			checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1), 
+			              COALESCE((SELECT archived FROM venues WHERE id = $1), false)`
+
+			err := s.db.QueryRowContext(ctx, checkQuery, venue.ID).Scan(&exists, &archived)
+
+			if err != nil {
+				return err
+			}
+
+			if !exists {
+				return ErrVenueNotFound
+			}
+			if archived {
+				return ErrVenueAlreadyArchived
+			}
+		}
+
+		// check if its a unique constraint violation
+		if database.IsPostgresUniqueConstraintError(err, "unique_venue_name_address") {
+			return ErrVenueDuplicate
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (s *VenueStore) Restore(ctx context.Context, id int64) error {
+	query := `UPDATE venues SET archived = false WHERE id = $1 AND archived = true`
+	result, err := s.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		// check if venue exists at all
+		var exists bool
+		var archived bool
+
+		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1), 
+		              COALESCE((SELECT archived FROM venues WHERE id = $1), false)`
+
+		err := s.db.QueryRowContext(ctx, checkQuery, id).Scan(&exists, &archived)
+
+		if err != nil {
+			return err
+		}
+
+		if !exists {
+			return ErrVenueNotFound
+		}
+		if !archived {
+			return ErrVenueNotArchived
+		}
+	}
+
+	return nil
+}
