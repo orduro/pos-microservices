@@ -56,6 +56,7 @@ services:
 
       # Services configuration
       - BASE_URL=http://localhost:8082
+      - FRONTEND_ADMIN_URL=http://localhost:3000
       - COMMUNICATION_SERVICE_URL=http://communication-service-dev:8083
     ports:
       - "8082:8082"

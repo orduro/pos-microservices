@@ -6,18 +6,17 @@ import (
 )
 
 type Handler struct {
-	env        string
-	baseURL    string
-	store      store.Store
-	httpClient *httpclient.Client
+	env              string
+	frontendAdminURL string
+	store            store.Store
+	httpClient       *httpclient.Client
 }
 
-func New(env, baseURL string, s store.Store, httpClient *httpclient.Client) *Handler {
+func New(env, frontendAdminURL string, s store.Store, httpClient *httpclient.Client) *Handler {
 	return &Handler{
-		env:        env,
-		baseURL:    baseURL,
-		store:      s,
-		httpClient: httpClient,
+		env:              env,
+		frontendAdminURL: frontendAdminURL,
+		store:            s,
+		httpClient:       httpClient,
 	}
 }
-

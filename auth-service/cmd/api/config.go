@@ -23,6 +23,7 @@ type postgresConf struct {
 
 type servicesConf struct {
 	BaseURL                 string `envconfig:"BASE_URL" validate:"required,url"`
+	FrontendAdminURL        string `envconfig:"FRONTEND_ADMIN_URL" validate:"required,url"`
 	CommunicationServiceURL string `envconfig:"COMMUNICATION_SERVICE_URL" validate:"required"`
 }
 

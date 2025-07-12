@@ -1,7 +1,7 @@
-// auth-service/internal/handler/register_user.go
 package handler
 
 import (
+	"context"
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
@@ -86,16 +86,20 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// generate verification link to verify with current token
-	verificationLink := fmt.Sprintf("%s/api/verification?token=%s", h.baseURL, token)
+	// generate verification link and send verification email in background
+	go func() {
+		// create new context with timeout for this background operation
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
 
-	// send verification email using HTTP client
-	err = h.httpClient.SendVerificationEmail(r.Context(), registrationDetails.Email, verificationLink)
-	if err != nil {
-		json.WriteError(w, r, http.StatusInternalServerError, "failed to send verification email")
-		log.Printf("failed to send verification email: %v", err)
-		return
-	}
+		// generate verification link to verify with current token
+		verificationLink := fmt.Sprintf("%s/verification?token=%s", h.frontendAdminURL, token)
+
+		err = h.httpClient.SendVerificationEmail(ctx, registrationDetails.Email, verificationLink)
+		if err != nil {
+			log.Printf("failed to send verification email: %v", err)
+		}
+	}()
 
 	json.Write(w, http.StatusCreated, map[string]any{
 		"message": "User registered successfully. Please check your email for verification instructions.",
