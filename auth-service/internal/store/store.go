@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	v                = validator.New()
+	V                = validator.New()
 	ErrUserNotFound  = errors.New("user not found")
 	ErrUserExists    = errors.New("user already exists")
 	ErrTokenNotFound = errors.New("verification token not found")

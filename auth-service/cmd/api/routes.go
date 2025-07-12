@@ -29,10 +29,14 @@ func (s *server) mount() *chi.Mux {
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
+	// healthcheck
+	r.Get("/health", handler.Healthcheck)
+
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
-		r.Get("/health", handler.Healthcheck)
+
 		r.Post("/register", handler.RegisterUser)
+		r.Post("/resend-verification", handler.ResendVerificationEmail)
 	})
 
 	return r
