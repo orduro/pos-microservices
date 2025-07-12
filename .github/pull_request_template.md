@@ -10,7 +10,6 @@ Describe your changes
 - [ ] Does this feature use any external libraries/packages that is not from std?
 - [ ] Any database migrations or environment variables needed?
 - [ ] Is the code clean and readable
-- [ ] Have you included/updated swagger api docs and regenerated it?
 
 ## Additional notes
 
