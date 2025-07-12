@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/go-chi/chi/v5 v5.2.2
-	github.com/go-playground/validator/v10 v10.26.0
+	github.com/go-playground/validator/v10 v10.27.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/orduro/common v0.1.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df

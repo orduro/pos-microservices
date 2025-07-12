@@ -14,7 +14,7 @@ type UserRegistrationDetails struct {
 }
 
 func (u *UserRegistrationDetails) Validate() error {
-	return v.Struct(u)
+	return V.Struct(u)
 }
 
 type User struct {
