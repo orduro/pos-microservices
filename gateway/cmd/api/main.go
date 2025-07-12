@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "github.com/orduro/pos-microservices/gateway/cmd/api/docs"
 	"log"
 )
 

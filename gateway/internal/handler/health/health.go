@@ -14,13 +14,6 @@ type Health struct {
 	Timestamp   time.Time `json:"timestamp"`
 }
 
-// @Summary Health check endpoint
-// @Description Get the health status of the gateway service
-// @Tags health
-// @Accept json
-// @Produce json
-// @Success 200 {object} Health
-// @Router /api/health [get]
 func (h *Handler) Check(w http.ResponseWriter, r *http.Request) {
 	data := &Health{
 		Service:     "gateway",
