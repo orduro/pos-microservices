@@ -42,11 +42,11 @@ func (h *Handler) UpdateVenue(w http.ResponseWriter, r *http.Request) {
 
 	// parse incoming update request (partial update)
 	var updateRequest struct {
-		Name        *string `json:"name,omitempty"`
-		Address     *string `json:"address,omitempty"`
-		Phone       *string `json:"phone,omitempty"`
-		VenueType   *string `json:"venue_type,omitempty"`
-		Description *string `json:"description,omitempty"`
+		Name        *string `json:"name"`
+		Address     *string `json:"address"`
+		Phone       *string `json:"phone"`
+		VenueType   *string `json:"venue_type"`
+		Description *string `json:"description"`
 	}
 
 	err = json.Read(r, &updateRequest)
