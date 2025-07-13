@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/orduro/common/json"
+	"github.com/orduro/pos-microservices/auth-service/internal/constants"
 )
 
 type Health struct {
@@ -16,8 +17,8 @@ type Health struct {
 
 func (h *Handler) Healthcheck(w http.ResponseWriter, r *http.Request) {
 	data := &Health{
-		Service:     "auth-service",
-		Health:      "alive",
+		Service:     constants.ServiceNameAuth,
+		Health:      constants.StatusHealthy,
 		Environment: h.env,
 		Timestamp:   time.Now().Local(),
 	}
