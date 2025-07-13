@@ -10,12 +10,7 @@ import (
 
 func (s *server) mount() *chi.Mux {
 	// initialise handler
-	handler := handler.New(
-		s.config.Env,
-		s.config.Services.FrontendAdminURL,
-		s.store,
-		s.httpClient,
-	)
+	handler := handler.New(s.config.Env, s.userService)
 
 	r := chi.NewRouter()
 

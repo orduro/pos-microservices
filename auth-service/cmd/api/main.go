@@ -5,6 +5,7 @@ import (
 
 	"github.com/orduro/pos-microservices/auth-service/internal/database"
 	"github.com/orduro/pos-microservices/auth-service/internal/httpclient"
+	"github.com/orduro/pos-microservices/auth-service/internal/service"
 	"github.com/orduro/pos-microservices/auth-service/internal/store"
 )
 
@@ -16,7 +17,12 @@ func main() {
 	}
 
 	// connect to postgres db
-	pgconn, err := database.NewPostgresPool(cfg.Postgres.DSN, cfg.Postgres.MaxOpenConns, cfg.Postgres.MaxIdleConns, cfg.Postgres.MaxIdleTime)
+	pgconn, err := database.NewPostgresPool(
+		cfg.Postgres.DSN,
+		cfg.Postgres.MaxOpenConns,
+		cfg.Postgres.MaxIdleConns,
+		cfg.Postgres.MaxIdleTime,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,10 +38,13 @@ func main() {
 	}
 	httpClient := httpclient.NewHttpClient(httpClientConfig)
 
+	// init services
+	tokenService := service.NewTokenService(store.VerificationTokens)
+	userService := service.NewUserService(store.Users, tokenService, httpClient, cfg.Services.FrontendAdminURL)
+
 	srv := &server{
-		config:     cfg,
-		store:      store,
-		httpClient: httpClient,
+		config:      cfg,
+		userService: userService,
 	}
 
 	// routes using chi router (routes.go)

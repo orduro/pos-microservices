@@ -1,22 +1,17 @@
 package handler
 
 import (
-	"github.com/orduro/pos-microservices/auth-service/internal/httpclient"
-	"github.com/orduro/pos-microservices/auth-service/internal/store"
+	"github.com/orduro/pos-microservices/auth-service/internal/service"
 )
 
 type Handler struct {
-	env              string
-	frontendAdminURL string
-	store            store.Store
-	httpClient       *httpclient.Client
+	env         string
+	userService *service.UserService
 }
 
-func New(env, frontendAdminURL string, s store.Store, httpClient *httpclient.Client) *Handler {
+func New(env string, userService *service.UserService) *Handler {
 	return &Handler{
-		env:              env,
-		frontendAdminURL: frontendAdminURL,
-		store:            s,
-		httpClient:       httpClient,
+		env:         env,
+		userService: userService,
 	}
 }
