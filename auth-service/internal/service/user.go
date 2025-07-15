@@ -74,6 +74,7 @@ func (s *UserService) ResendVerificationEmail(ctx context.Context, email string)
 	if err != nil {
 		if errors.Is(err, store.ErrUserNotFound) {
 			// don't reveal if user exists for security reasons
+			log.Printf("account with email: %s doesn't exist, no emails will be sent.", email)
 			return nil
 		}
 		return fmt.Errorf("failed to check user: %w", err)
@@ -92,13 +93,13 @@ func (s *UserService) ResendVerificationEmail(ctx context.Context, email string)
 func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 	token, err := s.tokenService.ValidateToken(ctx, tokenStr, constants.TokenTypeEmailVerification)
 	if err != nil {
-		return fmt.Errorf("invalid verification token: %w", err)
+		return err
 	}
 
 	// check if user is already verified before attempting to mark as verified
 	user, err := s.userStore.GetById(ctx, token.UserID)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return err
 	}
 
 	if user.IsVerified {
@@ -106,7 +107,7 @@ func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 	}
 
 	if err := s.userStore.MarkAsVerified(ctx, token.UserID); err != nil {
-		return fmt.Errorf("failed to mark user as verified: %w", err)
+		return err
 	}
 
 	return nil

@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
-	"fmt"
 	"time"
 
 	"github.com/orduro/pos-microservices/auth-service/internal/constants"
@@ -24,7 +23,7 @@ func NewTokenService(store store.VerificationTokenRepository) *TokenService {
 func (s *TokenService) GenerateToken() (string, error) {
 	bytes := make([]byte, constants.TokenByteLength)
 	if _, err := rand.Read(bytes); err != nil {
-		return "", fmt.Errorf("failed to generate random bytes: %w", err)
+		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
 }
@@ -32,7 +31,7 @@ func (s *TokenService) GenerateToken() (string, error) {
 func (s *TokenService) CreateVerificationToken(ctx context.Context, userID int64) (string, error) {
 	token, err := s.GenerateToken()
 	if err != nil {
-		return "", fmt.Errorf("failed to generate token: %w", err)
+		return "", err
 	}
 
 	verificationToken := store.VerificationToken{
@@ -43,7 +42,7 @@ func (s *TokenService) CreateVerificationToken(ctx context.Context, userID int64
 	}
 
 	if err := s.store.Create(ctx, &verificationToken); err != nil {
-		return "", fmt.Errorf("failed to store verification token: %w", err)
+		return "", err
 	}
 
 	return token, nil
@@ -52,7 +51,7 @@ func (s *TokenService) CreateVerificationToken(ctx context.Context, userID int64
 func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int64) (string, error) {
 	token, err := s.GenerateToken()
 	if err != nil {
-		return "", fmt.Errorf("failed to generate token: %w", err)
+		return "", err
 	}
 
 	resetToken := store.VerificationToken{
@@ -63,7 +62,7 @@ func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int6
 	}
 
 	if err := s.store.Create(ctx, &resetToken); err != nil {
-		return "", fmt.Errorf("failed to store password reset token: %w", err)
+		return "", err
 	}
 
 	return token, nil
@@ -72,7 +71,7 @@ func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int6
 func (s *TokenService) ValidateToken(ctx context.Context, tokenStr, tokenType string) (*store.VerificationToken, error) {
 	token, err := s.store.GetByToken(ctx, tokenStr, tokenType)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get token: %w", err)
+		return nil, err
 	}
 
 	// check if token is expired
@@ -82,7 +81,7 @@ func (s *TokenService) ValidateToken(ctx context.Context, tokenStr, tokenType st
 
 	// mark token as used
 	if err := s.store.MarkAsUsed(ctx, token.ID); err != nil {
-		return nil, fmt.Errorf("failed to mark token as used: %w", err)
+		return nil, err
 	}
 
 	return token, nil
