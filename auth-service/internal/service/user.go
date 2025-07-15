@@ -56,7 +56,6 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 		PasswordHash: hashedPassword,
 		FirstName:    "",
 		LastName:     "",
-		IsVerified:   false,
 	}
 
 	if err := s.userStore.Create(ctx, &user); err != nil {

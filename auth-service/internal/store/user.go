@@ -18,15 +18,15 @@ func (u *UserRegistrationDetails) Validate() error {
 }
 
 type User struct {
-	ID           int64     `json:"id"`
-	Email        string    `json:"email"`
-	PasswordHash string    `json:"-"`
-	FirstName    string    `json:"first_name"`
-	LastName     string    `json:"last_name"`
-	LastLoginAt  time.Time `json:"last_login_at"`
-	IsVerified   bool      `json:"is_verified"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           int64      `json:"id"`
+	Email        string     `json:"email"`
+	PasswordHash string     `json:"-"`
+	FirstName    string     `json:"first_name"`
+	LastName     string     `json:"last_name"`
+	LastLoginAt  *time.Time `json:"last_login_at,omitempty"`
+	IsVerified   bool       `json:"is_verified"`
+	CreatedAt    time.Time  `json:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at"`
 }
 
 type UserStore struct {
@@ -35,14 +35,15 @@ type UserStore struct {
 
 func (s *UserStore) Create(ctx context.Context, user *User) error {
 	query := `
-		INSERT INTO users (email, password_hash, first_name, last_name, is_verified)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id, created_at, updated_at
+		INSERT INTO users (email, password_hash, first_name, last_name)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, is_verified, created_at, updated_at
 	`
-	args := []any{user.Email, user.PasswordHash, user.FirstName, user.LastName, user.IsVerified}
+	args := []any{user.Email, user.PasswordHash, user.FirstName, user.LastName}
 
 	err := s.db.QueryRowContext(ctx, query, args...).Scan(
 		&user.ID,
+		&user.IsVerified,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
