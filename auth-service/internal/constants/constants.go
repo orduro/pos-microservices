@@ -18,30 +18,12 @@ const (
 )
 
 const (
-	ServiceNameAuth = "auth-service"
-)
-
-const (
-	MsgRegistrationSuccess = "User registered successfully. Please check your email for verification instructions."
+	MsgRegistrationSuccess = "user registered successfully. please check your email for verification instructions."
 	MsgVerificationSent    = "if an account with this email exists, a verification email has been sent."
-)
-
-const (
-	ErrMsgInvalidJSON         = "invalid json value, cannot be read"
-	ErrMsgInvalidCredentials  = "invalid username or password"
-	ErrMsgUserExists          = "account with this email already exists"
-	ErrMsgUserNotFound        = "user not found"
-	ErrMsgUserAlreadyVerified = "user is already verified"
-	ErrMsgInternalError       = "unable to process request"
-	ErrMsgInvalidEmail        = "invalid email format"
 )
 
 const (
 	MinPasswordLength = 8
 	MaxPasswordLength = 128
 	MaxEmailLength    = 255
-)
-
-const (
-	StatusHealthy = "alive"
 )
