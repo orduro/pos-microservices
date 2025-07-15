@@ -63,7 +63,7 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmailAsync(details.Email, user.ID)
+	go s.sendVerificationEmail(details.Email, user.ID)
 
 	return &user, nil
 }
@@ -84,7 +84,7 @@ func (s *UserService) ResendVerificationEmail(ctx context.Context, email string)
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmailAsync(email, user.ID)
+	go s.sendVerificationEmail(email, user.ID)
 
 	return nil
 }
@@ -132,7 +132,7 @@ func (s *UserService) AuthenticateUser(ctx context.Context, email, password stri
 	return user, nil
 }
 
-func (s *UserService) sendVerificationEmailAsync(email string, userID int64) {
+func (s *UserService) sendVerificationEmail(email string, userID int64) {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
 	defer cancel()
 
