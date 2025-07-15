@@ -20,13 +20,13 @@ func (r *ResendVerificationRequest) Validate() error {
 func (h *Handler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 	var req ResendVerificationRequest
 	if err := json.Read(r, &req); err != nil {
-		json.WriteError(w, r, http.StatusBadRequest, constants.ErrMsgInvalidJSON)
+		json.WriteError(w, r, http.StatusBadRequest, "invalid json")
 		log.Printf("unable to read resend verification request: %v", err)
 		return
 	}
 
 	if err := req.Validate(); err != nil {
-		json.WriteError(w, r, http.StatusBadRequest, constants.ErrMsgInvalidEmail)
+		json.WriteError(w, r, http.StatusBadRequest, "invalid email")
 		log.Printf("invalid email format: %v", err)
 		return
 	}
@@ -34,10 +34,10 @@ func (h *Handler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request
 	err := h.userService.ResendVerificationEmail(r.Context(), req.Email)
 	if err != nil {
 		if err.Error() == "user is already verified" {
-			json.WriteError(w, r, http.StatusConflict, constants.ErrMsgUserAlreadyVerified)
+			json.WriteError(w, r, http.StatusConflict, err.Error())
 			return
 		}
-		json.WriteError(w, r, http.StatusInternalServerError, constants.ErrMsgInternalError)
+		json.WriteError(w, r, http.StatusInternalServerError, "failed to resend verification email")
 		log.Printf("failed to resend verification email: %v", err)
 		return
 	}
@@ -46,4 +46,3 @@ func (h *Handler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request
 		"message": constants.MsgVerificationSent,
 	})
 }
-
