@@ -32,6 +32,7 @@ func (s *server) mount() *chi.Mux {
 
 		r.Post("/register", handler.RegisterUser)
 		r.Post("/resend-verification", handler.ResendVerificationEmail)
+		r.Get("/verify/{token}", handler.UserVerification)
 	})
 
 	return r

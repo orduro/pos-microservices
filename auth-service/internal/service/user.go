@@ -95,6 +95,16 @@ func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 		return fmt.Errorf("invalid verification token: %w", err)
 	}
 
+	// check if user is already verified before attempting to mark as verified
+	user, err := s.userStore.GetById(ctx, token.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	if user.IsVerified {
+		return errors.New("user is already verified")
+	}
+
 	if err := s.userStore.MarkAsVerified(ctx, token.UserID); err != nil {
 		return fmt.Errorf("failed to mark user as verified: %w", err)
 	}
