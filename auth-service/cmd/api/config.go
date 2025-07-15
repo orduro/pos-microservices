@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/kelseyhightower/envconfig"
-	"time"
 )
 
 type config struct {
@@ -12,6 +13,7 @@ type config struct {
 	Env      string        `envconfig:"ENVIRONMENT" validate:"required,oneof=dev development staging prod production"`
 	Postgres *postgresConf `validate:"required"`
 	Services *servicesConf `validate:"required"`
+	JWT      *jwtConf      `validate:"required"`
 }
 
 type postgresConf struct {
@@ -25,6 +27,15 @@ type servicesConf struct {
 	BaseURL                 string `envconfig:"BASE_URL" validate:"required,url"`
 	FrontendAdminURL        string `envconfig:"FRONTEND_ADMIN_URL" validate:"required,url"`
 	CommunicationServiceURL string `envconfig:"COMMUNICATION_SERVICE_URL" validate:"required"`
+}
+
+// token defaults:
+// - 24 hours expiration
+// - 7 days refresh
+type jwtConf struct {
+	Secret                string        `envconfig:"JWT_SECRET" validate:"required,min=32"`
+	ExpirationTime        time.Duration `envconfig:"JWT_EXPIRATION_TIME" default:"24h"`
+	RefreshExpirationTime time.Duration `envconfig:"JWT_REFRESH_EXPIRATION_TIME" default:"168h"`
 }
 
 func NewConfig() (*config, error) {
