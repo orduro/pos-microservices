@@ -13,13 +13,13 @@ import (
 func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var registrationDetails store.UserRegistrationDetails
 	if err := json.Read(r, &registrationDetails); err != nil {
-		json.WriteError(w, r, http.StatusBadRequest, constants.ErrMsgInvalidJSON)
+		json.WriteError(w, r, http.StatusBadRequest, "invalid json")
 		log.Printf("unable to read registration details: %v", err)
 		return
 	}
 
 	if err := registrationDetails.Validate(); err != nil {
-		json.WriteError(w, r, http.StatusBadRequest, constants.ErrMsgInvalidCredentials)
+		json.WriteError(w, r, http.StatusBadRequest, "invalid registration details")
 		log.Printf("invalid registration details: %v", err)
 		return
 	}
@@ -28,10 +28,10 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, store.ErrUserExists):
-			json.WriteError(w, r, http.StatusConflict, constants.ErrMsgUserExists)
+			json.WriteError(w, r, http.StatusConflict, err.Error())
 			return
 		default:
-			json.WriteError(w, r, http.StatusInternalServerError, constants.ErrMsgInternalError)
+			json.WriteError(w, r, http.StatusInternalServerError, "failed to register user")
 			log.Printf("failed to register user: %v", err)
 			return
 		}
