@@ -17,6 +17,15 @@ func (u *UserRegistrationDetails) Validate() error {
 	return V.Struct(u)
 }
 
+type UserLoginDetails struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
+}
+
+func (u *UserLoginDetails) Validate() error {
+	return V.Struct(u)
+}
+
 type User struct {
 	ID           int64      `json:"id"`
 	Email        string     `json:"email"`
@@ -123,6 +132,30 @@ func (s *UserStore) MarkAsVerified(ctx context.Context, userID int64) error {
 		UPDATE users 
 		SET is_verified = true, updated_at = NOW()
 		WHERE id = $1 AND is_verified = false
+	`
+
+	result, err := s.db.ExecContext(ctx, query, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}
+
+func (s *UserStore) UpdateLastLogin(ctx context.Context, userID int64) error {
+	query := `
+		UPDATE users 
+		SET last_login_at = NOW(), updated_at = NOW()
+		WHERE id = $1
 	`
 
 	result, err := s.db.ExecContext(ctx, query, userID)

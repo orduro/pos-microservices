@@ -38,6 +38,7 @@ type UserRepository interface {
 	GetById(ctx context.Context, id int64) (*User, error)
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	MarkAsVerified(ctx context.Context, userID int64) error
+	UpdateLastLogin(ctx context.Context, userID int64) error
 }
 
 type VerificationTokenRepository interface {
