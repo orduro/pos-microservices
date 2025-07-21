@@ -14,8 +14,9 @@ import (
 )
 
 type UserService struct {
-	userStore    store.UserRepository
+	user         store.UserRepository
 	tokenService *TokenService
+	jwtService   *JWTService
 	httpClient   *httpclient.Client
 	frontendURL  string
 }
@@ -23,12 +24,14 @@ type UserService struct {
 func NewUserService(
 	userStore store.UserRepository,
 	tokenService *TokenService,
+	jwtService *JWTService,
 	httpClient *httpclient.Client,
 	frontendURL string,
 ) *UserService {
 	return &UserService{
-		userStore:    userStore,
+		user:         userStore,
 		tokenService: tokenService,
+		jwtService:   jwtService,
 		httpClient:   httpClient,
 		frontendURL:  frontendURL,
 	}
@@ -36,7 +39,7 @@ func NewUserService(
 
 func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegistrationDetails) (*store.User, error) {
 	// check if user already exists
-	existingUser, err := s.userStore.GetByEmail(ctx, details.Email)
+	existingUser, err := s.user.GetByEmail(ctx, details.Email)
 	if err != nil && !errors.Is(err, store.ErrUserNotFound) {
 		return nil, fmt.Errorf("failed to check existing user: %w", err)
 	}
@@ -58,7 +61,7 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 		LastName:     "",
 	}
 
-	if err := s.userStore.Create(ctx, &user); err != nil {
+	if err := s.user.Create(ctx, &user); err != nil {
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
@@ -69,7 +72,7 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 }
 
 func (s *UserService) ResendVerificationEmail(ctx context.Context, email string) error {
-	user, err := s.userStore.GetByEmail(ctx, email)
+	user, err := s.user.GetByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, store.ErrUserNotFound) {
 			// don't reveal if user exists for security reasons
@@ -96,7 +99,7 @@ func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 	}
 
 	// check if user is already verified before attempting to mark as verified
-	user, err := s.userStore.GetById(ctx, token.UserID)
+	user, err := s.user.GetById(ctx, token.UserID)
 	if err != nil {
 		return err
 	}
@@ -105,20 +108,44 @@ func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 		return errors.New("user is already verified")
 	}
 
-	if err := s.userStore.MarkAsVerified(ctx, token.UserID); err != nil {
+	if err := s.user.MarkAsVerified(ctx, token.UserID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (s *UserService) AuthenticateUser(ctx context.Context, email, password string) (*store.User, error) {
-	user, err := s.userStore.GetByEmail(ctx, email)
+func (s *UserService) LoginUser(ctx context.Context, details store.UserLoginDetails) (*TokenPair, error) {
+	// authenticate user by checking email and password matches
+	user, err := s.AuthenticateUser(ctx, details.Email, details.Password)
 	if err != nil {
-		if errors.Is(err, store.ErrUserNotFound) {
-			return nil, errors.New("invalid credentials")
+		return nil, err
+	}
+
+	// generate token pair
+	tokenPair, err := s.jwtService.GenerateTokenPair(user.ID, user.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		if err := s.user.UpdateLastLogin(context.Background(), user.ID); err != nil {
+			log.Printf("failed to update last login: %v", err)
 		}
-		return nil, fmt.Errorf("failed to get user: %w", err)
+	}()
+
+	return tokenPair, nil
+
+}
+
+func (s *UserService) RefreshTokens(ctx context.Context, refreshToken string) (*TokenPair, error) {
+	return s.jwtService.RefreshToken(refreshToken)
+}
+
+func (s *UserService) AuthenticateUser(ctx context.Context, email, password string) (*store.User, error) {
+	user, err := s.user.GetByEmail(ctx, email)
+	if err != nil {
+		return nil, err
 	}
 
 	if !s.verifyPassword(password, user.PasswordHash) {

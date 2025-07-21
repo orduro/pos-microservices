@@ -31,6 +31,8 @@ func (s *server) mount() *chi.Mux {
 	r.Route("/api", func(r chi.Router) {
 
 		r.Post("/register", handler.RegisterUser)
+		r.Post("/login", handler.Login)
+		r.Post("/refresh", handler.RefreshToken)
 		r.Post("/resend-verification", handler.ResendVerificationEmail)
 		r.Get("/verify/{token}", handler.UserVerification)
 	})
