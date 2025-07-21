@@ -16,6 +16,8 @@ services:
     image: venue-service:latest
     container_name: venue-service-dev
     build:
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
       context: ./venue-service/
       dockerfile: Dockerfile.dev
     volumes:
@@ -38,6 +40,8 @@ services:
     image: auth-service:latest
     container_name: auth-service-dev
     build:
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
       context: ./auth-service/
       dockerfile: Dockerfile.dev
     volumes:
@@ -70,6 +74,8 @@ services:
     image: communication-service:latest
     container_name: communication-service-dev
     build:
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
       context: ./communication-service/
       dockerfile: Dockerfile.dev
     volumes:
