@@ -40,7 +40,8 @@ func main() {
 
 	// init services
 	tokenService := service.NewTokenService(store.VerificationTokens)
-	userService := service.NewUserService(store.Users, tokenService, httpClient, cfg.Services.FrontendAdminURL)
+	jwtService := service.NewJWTService(cfg.JWT.Secret, cfg.JWT.ExpirationTime, cfg.JWT.RefreshExpirationTime)
+	userService := service.NewUserService(store.Users, tokenService, jwtService, httpClient, cfg.Services.FrontendAdminURL)
 
 	srv := &server{
 		config:      cfg,

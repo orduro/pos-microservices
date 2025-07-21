@@ -30,11 +30,11 @@ type servicesConf struct {
 }
 
 // token defaults:
-// - 24 hours expiration
-// - 7 days refresh
+// - 3 min access token expiration
+// - 7 days refresh token expiration
 type jwtConf struct {
 	Secret                string        `envconfig:"JWT_SECRET" validate:"required,min=32"`
-	ExpirationTime        time.Duration `envconfig:"JWT_EXPIRATION_TIME" default:"24h"`
+	ExpirationTime        time.Duration `envconfig:"JWT_EXPIRATION_TIME" default:"3m"`
 	RefreshExpirationTime time.Duration `envconfig:"JWT_REFRESH_EXPIRATION_TIME" default:"168h"`
 }
 

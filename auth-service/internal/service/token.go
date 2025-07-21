@@ -11,12 +11,12 @@ import (
 )
 
 type TokenService struct {
-	store store.VerificationTokenRepository
+	token store.VerificationTokenRepository
 }
 
 func NewTokenService(store store.VerificationTokenRepository) *TokenService {
 	return &TokenService{
-		store: store,
+		token: store,
 	}
 }
 
@@ -41,7 +41,7 @@ func (s *TokenService) CreateVerificationToken(ctx context.Context, userID int64
 		ExpiresAt: time.Now().Add(constants.TokenExpiryDuration),
 	}
 
-	if err := s.store.Create(ctx, &verificationToken); err != nil {
+	if err := s.token.Create(ctx, &verificationToken); err != nil {
 		return "", err
 	}
 
@@ -61,7 +61,7 @@ func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int6
 		ExpiresAt: time.Now().Add(constants.TokenExpiryDuration),
 	}
 
-	if err := s.store.Create(ctx, &resetToken); err != nil {
+	if err := s.token.Create(ctx, &resetToken); err != nil {
 		return "", err
 	}
 
@@ -69,7 +69,7 @@ func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int6
 }
 
 func (s *TokenService) ValidateToken(ctx context.Context, tokenStr, tokenType string) (*store.VerificationToken, error) {
-	token, err := s.store.GetByToken(ctx, tokenStr, tokenType)
+	token, err := s.token.GetByToken(ctx, tokenStr, tokenType)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (s *TokenService) ValidateToken(ctx context.Context, tokenStr, tokenType st
 	}
 
 	// mark token as used
-	if err := s.store.MarkAsUsed(ctx, token.ID); err != nil {
+	if err := s.token.MarkAsUsed(ctx, token.ID); err != nil {
 		return nil, err
 	}
 
