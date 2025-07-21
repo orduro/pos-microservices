@@ -59,8 +59,8 @@ services:
 
       # JWT configs
       - JWT_SECRET=iReallylikevanillaicecream123456789
-      # - JWT_EXPIRATION_TIME=
-      # - JWT_REFRESH_EXPIRATION_TIME=
+      - JWT_EXPIRATION_TIME=3m
+      - JWT_REFRESH_EXPIRATION_TIME=168h
     ports:
       - "8082:8082"
     depends_on:
