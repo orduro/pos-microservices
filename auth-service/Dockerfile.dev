@@ -2,12 +2,17 @@
 
 FROM golang:1.24.4-alpine
 
+ENV GOPRIVATE=github.com/orduro/*
+
 # Set destination for COPY
 WORKDIR /app
 
 # Install air and required packages for development
 RUN apk add --no-cache curl git \
     && go install github.com/air-verse/air@latest
+
+ARG GITHUB_TOKEN
+RUN git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 
 # Add GOPATH/bin to PATH to ensure air is accessible
 ENV PATH="/go/bin:${PATH}"
