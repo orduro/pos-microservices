@@ -26,6 +26,9 @@ services:
       - SERVER_PORT=:8081
       - ENVIRONMENT=dev
 
+      # JWT configs
+      - JWT_SECRET=iReallylikevanillaicecream123456789
+
       # PostgreSQL configuration
       - POSTGRES_DSN=postgres://root:toor@venue-service-postgres:5432/venue_service_db?sslmode=disable
       - POSTGRES_MAX_OPEN_CONNS=25
