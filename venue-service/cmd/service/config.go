@@ -11,6 +11,7 @@ type config struct {
 	Addr     string        `envconfig:"SERVER_PORT" validate:"required"`
 	Env      string        `envconfig:"ENVIRONMENT" validate:"required,oneof=dev development staging prod production"`
 	Postgres *postgresConf `validate:"required"`
+	JWT      *jwtConf      `validate:"required"`
 }
 
 type postgresConf struct {
@@ -18,6 +19,10 @@ type postgresConf struct {
 	MaxOpenConns int           `envconfig:"POSTGRES_MAX_OPEN_CONNS" validate:"required,min=1"`
 	MaxIdleConns int           `envconfig:"POSTGRES_MAX_IDLE_CONNS" validate:"required,min=0"`
 	MaxIdleTime  time.Duration `envconfig:"POSTGRES_MAX_IDLE_TIME" validate:"required"`
+}
+
+type jwtConf struct {
+	Secret string `envconfig:"JWT_SECRET" validate:"required,min=32"`
 }
 
 func NewConfig() (*config, error) {
