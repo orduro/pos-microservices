@@ -8,7 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.3
 	github.com/jackc/pgx/v5 v5.7.5
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/orduro/common v0.2.4
+	github.com/orduro/common v0.2.5
 	golang.org/x/crypto v0.37.0
 )
 
