@@ -21,12 +21,9 @@ func startTokenCleanupJob(tokenStore store.VerificationTokenRepository) {
 	}
 
 	// then run on schedule
-	for {
-		select {
-		case <-ticker.C:
-			if err := cleanupExpiredTokens(tokenStore); err != nil {
-				log.Printf("scheduled token cleanup failed: %v", err)
-			}
+	for range ticker.C {
+		if err := cleanupExpiredTokens(tokenStore); err != nil {
+			log.Printf("scheduled token cleanup failed: %v", err)
 		}
 	}
 }
