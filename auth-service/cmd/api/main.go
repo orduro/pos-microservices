@@ -32,6 +32,9 @@ func main() {
 	// init store
 	store := store.NewStore(pgconn)
 
+	// start cleanup job for expired tokens
+	go startTokenCleanupJob(store.VerificationTokens)
+
 	// init httpclient for service-service communication
 	httpClientConfig := httpclient.Config{
 		CommunicationServiceURL: cfg.Services.CommunicationServiceURL,
