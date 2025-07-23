@@ -30,18 +30,18 @@ func NewJWTService(secret string, expirationTime, refreshExpirationTime time.Dur
 }
 
 func (s *JWTService) GenerateTokenPair(userID int64, email string) (*TokenPair, error) {
-	return s.GenerateTokenPairWithRoles(userID, email, nil, nil)
+	return s.GenerateTokenPairWithTenant(userID, email, nil)
 }
 
-func (s *JWTService) GenerateTokenPairWithRoles(userID int64, email string, tenantID *string, roles []string) (*TokenPair, error) {
+func (s *JWTService) GenerateTokenPairWithTenant(userID int64, email string, tenantID *string) (*TokenPair, error) {
 	// generate access token
-	accessToken, accessExpiresAt, err := s.generateToken(userID, email, tenantID, roles, false, s.expirationTime)
+	accessToken, accessExpiresAt, err := s.generateToken(userID, email, tenantID, false, s.expirationTime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate access token: %w", err)
 	}
 
 	// generate refresh token
-	refreshToken, _, err := s.generateToken(userID, email, tenantID, roles, true, s.refreshExpirationTime)
+	refreshToken, _, err := s.generateToken(userID, email, tenantID, true, s.refreshExpirationTime)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate refresh token: %w", err)
 	}
@@ -53,14 +53,13 @@ func (s *JWTService) GenerateTokenPairWithRoles(userID int64, email string, tena
 	}, nil
 }
 
-func (s *JWTService) generateToken(userID int64, email string, tenantID *string, roles []string, isRefresh bool, duration time.Duration) (string, time.Time, error) {
+func (s *JWTService) generateToken(userID int64, email string, tenantID *string, isRefresh bool, duration time.Duration) (string, time.Time, error) {
 	expiresAt := time.Now().Add(duration)
 
 	claims := auth.Claims{
 		UserID:    userID,
 		Email:     email,
 		TenantID:  tenantID,
-		Roles:     roles,
 		IsRefresh: isRefresh,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expiresAt),
@@ -91,6 +90,6 @@ func (s *JWTService) RefreshToken(refreshTokenString string) (*TokenPair, error)
 	}
 
 	// generate new token pair
-	return s.GenerateTokenPairWithRoles(claims.UserID, claims.Email, claims.TenantID, claims.Roles)
+	return s.GenerateTokenPairWithTenant(claims.UserID, claims.Email, claims.TenantID)
 }
 

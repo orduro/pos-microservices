@@ -46,9 +46,6 @@ func (s *server) mount() *chi.Mux {
 
 			// routes for venue deletes `/venue/delete`
 			r.Route("/delete", func(r chi.Router) {
-				// require admin role
-				r.Use(auth.RequireRole("admin"))
-
 				r.Delete("/{id}", venuehandler.DeleteVenue)
 			})
 
