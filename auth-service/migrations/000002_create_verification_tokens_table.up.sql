@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS verification_tokens (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     token TEXT NOT NULL UNIQUE,
-    token_type TEXT NOT NULL,
+    token_type TEXT NOT NULL DEFAULT 'email_verification',
     expires_at TIMESTAMPTZ NOT NULL,
     used_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
