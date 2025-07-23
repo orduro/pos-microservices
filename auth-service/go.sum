@@ -27,8 +27,8 @@ github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dv
 github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
-github.com/orduro/common v0.2.5 h1:G7XOjaJry0EketTxksZWKhvTbOvS9fdhSVH6jAgnKog=
-github.com/orduro/common v0.2.5/go.mod h1:VNpRL5Pu/7M4lnCF5pzv1p+gjjnj0fyVg4iHPQBY7Nw=
+github.com/orduro/common v0.2.6 h1:NghVOmMhKFyWB/uSuWXO33+9T50oq4SVn0IN8j1BrNA=
+github.com/orduro/common v0.2.6/go.mod h1:VNpRL5Pu/7M4lnCF5pzv1p+gjjnj0fyVg4iHPQBY7Nw=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
