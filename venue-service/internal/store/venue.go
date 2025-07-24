@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"time"
 
+	"github.com/orduro/common/auth"
 	"github.com/orduro/pos-microservices/venue/internal/database"
 )
 
@@ -30,12 +31,18 @@ type VenueStore struct {
 }
 
 func (s *VenueStore) Create(ctx context.Context, venue *Venue) error {
+	// get tenant id from context
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return ErrTenantNotFound
+	}
+
 	query := `
-	INSERT INTO venues (name, address, phone, venue_type, description)
-	VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO venues (name, address, phone, venue_type, description, tenant_id)
+	VALUES ($1, $2, $3, $4, $5, $6)
 	RETURNING id, created_at, updated_at
 	`
-	args := []any{venue.Name, venue.Address, venue.Phone, venue.VenueType, venue.Description}
+	args := []any{venue.Name, venue.Address, venue.Phone, venue.VenueType, venue.Description, tenantID}
 	err := s.db.QueryRowContext(ctx, query, args...).Scan(
 		&venue.ID,
 		&venue.CreatedAt,
@@ -48,19 +55,27 @@ func (s *VenueStore) Create(ctx context.Context, venue *Venue) error {
 		}
 		return err
 	}
+	venue.TenantID = *tenantID
 	return nil
 }
 
 func (s *VenueStore) GetByID(ctx context.Context, id int64) (*Venue, error) {
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return nil, ErrTenantNotFound
+	}
+
 	query := `
-	SELECT id, name, address, phone, venue_type, description, archived, created_at, updated_at
+	SELECT id, name, address, phone, venue_type, description, archived, tenant_id, created_at, updated_at
 	FROM venues
-	WHERE id = $1
+	WHERE id = $1 AND tenant_id = $2
 	`
 
 	v := Venue{}
 
-	err := s.db.QueryRowContext(ctx, query, id).Scan(
+	args := []any{id, tenantID}
+
+	err := s.db.QueryRowContext(ctx, query, args...).Scan(
 		&v.ID,
 		&v.Name,
 		&v.Address,
@@ -68,6 +83,7 @@ func (s *VenueStore) GetByID(ctx context.Context, id int64) (*Venue, error) {
 		&v.VenueType,
 		&v.Description,
 		&v.Archived,
+		&v.TenantID,
 		&v.CreatedAt,
 		&v.UpdatedAt,
 	)
@@ -83,8 +99,15 @@ func (s *VenueStore) GetByID(ctx context.Context, id int64) (*Venue, error) {
 }
 
 func (s *VenueStore) Archive(ctx context.Context, id int64) error {
-	query := `UPDATE venues SET archived = true WHERE id = $1 AND archived = false`
-	result, err := s.db.ExecContext(ctx, query, id)
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return ErrTenantNotFound
+	}
+
+	args := []any{id, tenantID}
+
+	query := `UPDATE venues SET archived = true WHERE id = $1 AND tenant_id = $2 AND archived = false`
+	result, err := s.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return err
 	}
@@ -95,10 +118,10 @@ func (s *VenueStore) Archive(ctx context.Context, id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		// Check if venue exists at all
+		// check if venue exists at all
 		var exists bool
-		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1)`
-		err := s.db.QueryRowContext(ctx, checkQuery, id).Scan(&exists)
+		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1 AND tenant_id = $2)`
+		err := s.db.QueryRowContext(ctx, checkQuery, id, tenantID).Scan(&exists)
 		if err != nil {
 			return err
 		}
@@ -113,8 +136,13 @@ func (s *VenueStore) Archive(ctx context.Context, id int64) error {
 }
 
 func (s *VenueStore) Delete(ctx context.Context, id int64) error {
-	query := `DELETE FROM venues WHERE id = $1 AND archived = true`
-	result, err := s.db.ExecContext(ctx, query, id)
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return ErrTenantNotFound
+	}
+
+	query := `DELETE FROM venues WHERE id = $1 AND tenant_id = $2 AND archived = true`
+	result, err := s.db.ExecContext(ctx, query, id, tenantID)
 	if err != nil {
 		return err
 	}
@@ -125,13 +153,13 @@ func (s *VenueStore) Delete(ctx context.Context, id int64) error {
 	}
 
 	if rowsAffected == 0 {
-		// Check if venue exists at all
-		// Or is archived
+		// check if venue exists at all
+		// or is archived
 		var exists bool
 		var archived bool
-		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1), 
-                      COALESCE((SELECT archived FROM venues WHERE id = $1), false)`
-		err := s.db.QueryRowContext(ctx, checkQuery, id).Scan(&exists, &archived)
+		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1 AND tenant_id = $2), 
+                      COALESCE((SELECT archived FROM venues WHERE id = $1 AND tenant_id = $2), false)`
+		err := s.db.QueryRowContext(ctx, checkQuery, id, tenantID).Scan(&exists, &archived)
 		if err != nil {
 			return err
 		}
@@ -146,13 +174,18 @@ func (s *VenueStore) Delete(ctx context.Context, id int64) error {
 }
 
 func (s *VenueStore) Update(ctx context.Context, venue *Venue) error {
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return ErrTenantNotFound
+	}
+
 	query := `
 	UPDATE venues 
-	SET name = $2, address = $3, phone = $4, venue_type = $5, description = $6, updated_at = CURRENT_TIMESTAMP
-	WHERE id = $1 AND archived = false
+	SET name = $3, address = $4, phone = $5, venue_type = $6, description = $7, updated_at = CURRENT_TIMESTAMP
+	WHERE id = $1 AND tenant_id = $2 AND archived = false
 	RETURNING updated_at
 	`
-	args := []any{venue.ID, venue.Name, venue.Address, venue.Phone, venue.VenueType, venue.Description}
+	args := []any{venue.ID, tenantID, venue.Name, venue.Address, venue.Phone, venue.VenueType, venue.Description}
 
 	err := s.db.QueryRowContext(ctx, query, args...).Scan(&venue.UpdatedAt)
 
@@ -162,10 +195,10 @@ func (s *VenueStore) Update(ctx context.Context, venue *Venue) error {
 			var exists bool
 			var archived bool
 
-			checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1), 
-			              COALESCE((SELECT archived FROM venues WHERE id = $1), false)`
+			checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1 AND tenant_id = $2), 
+			              COALESCE((SELECT archived FROM venues WHERE id = $1 AND tenant_id = $2), false)`
 
-			err := s.db.QueryRowContext(ctx, checkQuery, venue.ID).Scan(&exists, &archived)
+			err := s.db.QueryRowContext(ctx, checkQuery, venue.ID, tenantID).Scan(&exists, &archived)
 
 			if err != nil {
 				return err
@@ -186,12 +219,18 @@ func (s *VenueStore) Update(ctx context.Context, venue *Venue) error {
 		return err
 	}
 
+	venue.TenantID = *tenantID
 	return nil
 }
 
 func (s *VenueStore) Restore(ctx context.Context, id int64) error {
-	query := `UPDATE venues SET archived = false WHERE id = $1 AND archived = true`
-	result, err := s.db.ExecContext(ctx, query, id)
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return ErrTenantNotFound
+	}
+
+	query := `UPDATE venues SET archived = false WHERE id = $1 AND tenant_id = $2 AND archived = true`
+	result, err := s.db.ExecContext(ctx, query, id, tenantID)
 	if err != nil {
 		return err
 	}
@@ -206,10 +245,10 @@ func (s *VenueStore) Restore(ctx context.Context, id int64) error {
 		var exists bool
 		var archived bool
 
-		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1), 
-		              COALESCE((SELECT archived FROM venues WHERE id = $1), false)`
+		checkQuery := `SELECT EXISTS(SELECT 1 FROM venues WHERE id = $1 AND tenant_id = $2), 
+		              COALESCE((SELECT archived FROM venues WHERE id = $1 AND tenant_id = $2), false)`
 
-		err := s.db.QueryRowContext(ctx, checkQuery, id).Scan(&exists, &archived)
+		err := s.db.QueryRowContext(ctx, checkQuery, id, tenantID).Scan(&exists, &archived)
 
 		if err != nil {
 			return err
