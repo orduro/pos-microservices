@@ -36,6 +36,7 @@ type User struct {
 	IsVerified   bool       `json:"is_verified"`
 	CreatedAt    time.Time  `json:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at"`
+	TenantID     string     `json:"tenant_id"`
 }
 
 type UserStore struct {
@@ -46,13 +47,14 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 	query := `
 		INSERT INTO users (email, password_hash, first_name, last_name)
 		VALUES ($1, $2, $3, $4)
-		RETURNING id, is_verified, created_at, updated_at
+		RETURNING id, is_verified, tenant_id, created_at, updated_at
 	`
 	args := []any{user.Email, user.PasswordHash, user.FirstName, user.LastName}
 
 	err := s.db.QueryRowContext(ctx, query, args...).Scan(
 		&user.ID,
 		&user.IsVerified,
+		&user.TenantID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -69,7 +71,7 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 }
 func (s *UserStore) GetById(ctx context.Context, id int64) (*User, error) {
 	query := `
-		SELECT id, email, password_hash, first_name, last_name, last_login_at, is_verified, created_at, updated_at
+		SELECT id, email, password_hash, first_name, last_name, last_login_at, is_verified, tenant_id, created_at, updated_at
 		FROM users
 		WHERE id = $1
 	`
@@ -83,6 +85,7 @@ func (s *UserStore) GetById(ctx context.Context, id int64) (*User, error) {
 		&user.LastName,
 		&user.LastLoginAt,
 		&user.IsVerified,
+		&user.TenantID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
@@ -99,7 +102,7 @@ func (s *UserStore) GetById(ctx context.Context, id int64) (*User, error) {
 
 func (s *UserStore) GetByEmail(ctx context.Context, email string) (*User, error) {
 	query := `
-		SELECT id, email, password_hash, first_name, last_name, last_login_at, is_verified, created_at, updated_at
+		SELECT id, email, password_hash, first_name, last_name, last_login_at, is_verified, tenant_id, created_at, updated_at
 		FROM users
 		WHERE email = $1
 	`
@@ -113,6 +116,7 @@ func (s *UserStore) GetByEmail(ctx context.Context, email string) (*User, error)
 		&user.LastName,
 		&user.LastLoginAt,
 		&user.IsVerified,
+		&user.TenantID,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 	)
