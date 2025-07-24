@@ -29,10 +29,6 @@ func NewJWTService(secret string, expirationTime, refreshExpirationTime time.Dur
 	}
 }
 
-func (s *JWTService) GenerateTokenPair(userID int64, email string) (*TokenPair, error) {
-	return s.GenerateTokenPairWithTenant(userID, email, nil)
-}
-
 func (s *JWTService) GenerateTokenPairWithTenant(userID int64, email string, tenantID *string) (*TokenPair, error) {
 	// generate access token
 	accessToken, accessExpiresAt, err := s.generateToken(userID, email, tenantID, false, s.expirationTime)
@@ -92,4 +88,3 @@ func (s *JWTService) RefreshToken(refreshTokenString string) (*TokenPair, error)
 	// generate new token pair
 	return s.GenerateTokenPairWithTenant(claims.UserID, claims.Email, claims.TenantID)
 }
-
