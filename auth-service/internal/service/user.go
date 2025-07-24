@@ -123,7 +123,7 @@ func (s *UserService) LoginUser(ctx context.Context, details store.UserLoginDeta
 	}
 
 	// generate token pair
-	tokenPair, err := s.jwtService.GenerateTokenPair(user.ID, user.Email)
+	tokenPair, err := s.jwtService.GenerateTokenPairWithTenant(user.ID, user.Email, &user.TenantID)
 	if err != nil {
 		return nil, err
 	}
