@@ -13,4 +13,5 @@ var (
 	ErrVenueAlreadyArchived = errors.New("venue already archived")
 	ErrVenueNotArchived     = errors.New("venue not archived")
 	ErrVenueDuplicate       = errors.New("venue with this name and address already exists")
+	ErrTenantNotFound       = errors.New("tenant not found in context")
 )

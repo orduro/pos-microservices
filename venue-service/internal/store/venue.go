@@ -16,6 +16,7 @@ type Venue struct {
 	VenueType   string    `json:"venue_type" validate:"omitempty,max=100"`
 	Description string    `json:"description" validate:"required,min=1,max=1000"`
 	Archived    bool      `json:"archived"`
+	TenantID    string    `json:"tenant_id"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
 }
