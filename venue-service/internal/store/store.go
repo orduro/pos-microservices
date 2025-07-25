@@ -24,4 +24,5 @@ type VenueRepository interface {
 	Delete(ctx context.Context, id int64) error
 	Update(ctx context.Context, venue *Venue) error
 	Restore(ctx context.Context, id int64) error
+	List(ctx context.Context, filter VenueFilter) ([]Venue, int, error)
 }
