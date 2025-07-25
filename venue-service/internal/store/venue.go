@@ -40,11 +40,12 @@ func (s *VenueStore) Create(ctx context.Context, venue *Venue) error {
 	query := `
 	INSERT INTO venues (name, address, phone, venue_type, description, tenant_id)
 	VALUES ($1, $2, $3, $4, $5, $6)
-	RETURNING id, created_at, updated_at
+	RETURNING id, archived, created_at, updated_at
 	`
 	args := []any{venue.Name, venue.Address, venue.Phone, venue.VenueType, venue.Description, tenantID}
 	err := s.db.QueryRowContext(ctx, query, args...).Scan(
 		&venue.ID,
+		&venue.Archived,
 		&venue.CreatedAt,
 		&venue.UpdatedAt,
 	)
