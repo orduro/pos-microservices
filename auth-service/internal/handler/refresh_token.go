@@ -40,10 +40,13 @@ func (h *Handler) RefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// don't include new refresh token
+	// the only time client gets refreshtoken is
+	// during sign in
 	response := RefreshTokenResponse{
 		Message:      "tokens refreshed successfully",
 		AccessToken:  tokenPair.AccessToken,
-		RefreshToken: tokenPair.RefreshToken,
+		RefreshToken: req.RefreshToken,
 		ExpiresAt:    tokenPair.ExpiresAt,
 	}
 

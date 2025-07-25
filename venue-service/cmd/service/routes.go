@@ -30,7 +30,7 @@ func (s *server) mount() *chi.Mux {
 
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
-		// make sure secret is correct for /api access
+		// all routes in /api require the user to be authenticated
 		r.Use(auth.JWTAuth(s.config.JWT.Secret))
 
 		// routes for /venue

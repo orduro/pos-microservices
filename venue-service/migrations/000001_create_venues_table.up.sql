@@ -11,6 +11,3 @@ CREATE TABLE IF NOT EXISTS venues (
    
    CONSTRAINT unique_venue_name_address UNIQUE (name, address)
 );
-CREATE INDEX idx_venues_name ON venues(name);
-CREATE INDEX idx_venues_archived ON venues(archived);
-CREATE INDEX idx_venues_venue_type ON venues(venue_type);
