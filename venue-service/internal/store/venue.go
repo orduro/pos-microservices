@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/orduro/common/auth"
@@ -24,6 +25,13 @@ type Venue struct {
 
 func ValidateVenue(venue *Venue) error {
 	return v.Struct(venue)
+}
+
+type VenueFilter struct {
+	IncludeArchived bool
+	Search          string
+	Limit           int
+	Offset          int
 }
 
 type VenueStore struct {
@@ -264,4 +272,89 @@ func (s *VenueStore) Restore(ctx context.Context, id int64) error {
 	}
 
 	return nil
+}
+
+func (s *VenueStore) List(ctx context.Context, filter VenueFilter) ([]Venue, int, error) {
+	tenantID, ok := auth.GetTenantID(ctx)
+	if !ok || tenantID == nil || *tenantID == "" {
+		return nil, 0, ErrTenantNotFound
+	}
+
+	// build the WHERE clause based on filters
+	whereClause := "WHERE tenant_id = $1"
+	args := []any{tenantID}
+	argCount := 1
+
+	// add archived filter
+	if !filter.IncludeArchived {
+		whereClause += " AND archived = false"
+	}
+
+	// add search filter
+	// whatever is put in the search will check name address and description
+	// to find matching
+	if filter.Search != "" {
+		argCount++
+		whereClause += fmt.Sprintf(" AND (name ILIKE $%d OR address ILIKE $%d OR description ILIKE $%d)",
+			argCount, argCount, argCount)
+		searchPattern := "%" + filter.Search + "%"
+		args = append(args, searchPattern)
+	}
+
+	countQuery := fmt.Sprintf("SELECT COUNT(*) FROM venues %s", whereClause)
+	var total int
+	err := s.db.QueryRowContext(ctx, countQuery, args...).Scan(&total)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to get venue count: %w", err)
+	}
+
+	// if no venues found, return early
+	if total == 0 {
+		return []Venue{}, 0, nil
+	}
+
+	// build the main query with pagination
+	query := fmt.Sprintf(`
+		SELECT id, name, address, phone, venue_type, description, archived, tenant_id, created_at, updated_at
+		FROM venues
+		%s
+		ORDER BY created_at DESC
+		LIMIT $%d OFFSET $%d
+	`, whereClause, argCount+1, argCount+2)
+
+	// add limit and offset to args
+	args = append(args, filter.Limit, filter.Offset)
+
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to query venues: %w", err)
+	}
+	defer rows.Close()
+
+	var venues []Venue
+	for rows.Next() {
+		var venue Venue
+		err := rows.Scan(
+			&venue.ID,
+			&venue.Name,
+			&venue.Address,
+			&venue.Phone,
+			&venue.VenueType,
+			&venue.Description,
+			&venue.Archived,
+			&venue.TenantID,
+			&venue.CreatedAt,
+			&venue.UpdatedAt,
+		)
+		if err != nil {
+			return nil, 0, fmt.Errorf("failed to scan venue: %w", err)
+		}
+		venues = append(venues, venue)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("error iterating venue rows: %w", err)
+	}
+
+	return venues, total, nil
 }
