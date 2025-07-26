@@ -34,8 +34,8 @@ func (s *server) mount() *chi.Mux {
 		r.Post("/login", handler.Login)
 		r.Post("/refresh", handler.RefreshToken)
 		r.Post("/resend-verification", handler.ResendVerificationEmail)
-		r.Get("/verify/{token}", handler.UserVerification)
-		r.Post("/forgot-password", handler.ForgotPassword)
+		r.Get("/verify/{token}", handler.UserVerificationCallback)
+		r.Post("/forgot-password", handler.InitialiseForgotPassword)
 	})
 
 	return r
