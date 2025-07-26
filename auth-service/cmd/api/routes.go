@@ -30,11 +30,21 @@ func (s *server) mount() *chi.Mux {
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
 
-		r.Post("/register", handler.RegisterUser)
-		r.Post("/login", handler.Login)
-		r.Post("/refresh", handler.RefreshToken)
-		r.Post("/resend-verification", handler.ResendVerificationEmail)
-		r.Get("/verify/{token}", handler.UserVerification)
+		r.Route("/auth", func(r chi.Router) {
+			r.Post("/register", handler.RegisterUser)
+			r.Post("/login", handler.Login)
+			r.Post("/refresh", handler.RefreshToken)
+		})
+
+		r.Route("/verification", func(r chi.Router) {
+			r.Post("/send", handler.SendEmailVerification)
+			r.Get("/{token}", handler.UserVerificationCallback)
+		})
+
+		r.Route("/password-reset", func(r chi.Router) {
+			r.Post("/send", handler.InitiatePasswordReset)
+			r.Post("/{token}", handler.PasswordResetCallback)
+		})
 	})
 
 	return r

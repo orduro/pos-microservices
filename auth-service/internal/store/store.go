@@ -1,4 +1,3 @@
-// Update your auth-service/internal/store/store.go
 package store
 
 import (
@@ -39,11 +38,12 @@ type UserRepository interface {
 	GetByEmail(ctx context.Context, email string) (*User, error)
 	MarkAsVerified(ctx context.Context, userID int64) error
 	UpdateLastLogin(ctx context.Context, userID int64) error
+	UpdatePassword(ctx context.Context, userID int64, hashedPassword string) error
 }
 
 type VerificationTokenRepository interface {
-	Create(ctx context.Context, token *VerificationToken) error
-	GetByToken(ctx context.Context, token string, tokenType string) (*VerificationToken, error)
+	Create(ctx context.Context, token *Token) error
+	GetByToken(ctx context.Context, token string, tokenType string) (*Token, error)
 	MarkAsUsed(ctx context.Context, tokenID int64) error
 	DeleteExpired(ctx context.Context) error
 }

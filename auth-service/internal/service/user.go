@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 
-	"golang.org/x/crypto/bcrypt"
-
 	"github.com/orduro/pos-microservices/auth-service/internal/constants"
 	"github.com/orduro/pos-microservices/auth-service/internal/httpclient"
 	"github.com/orduro/pos-microservices/auth-service/internal/store"
@@ -65,13 +63,10 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	// send verification email asynchronously
-	go s.sendVerificationEmail(details.Email, user.ID)
-
 	return &user, nil
 }
 
-func (s *UserService) ResendVerificationEmail(ctx context.Context, email string) error {
+func (s *UserService) SendEmailVerification(ctx context.Context, email string) error {
 	user, err := s.user.GetByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, store.ErrUserNotFound) {
@@ -87,7 +82,24 @@ func (s *UserService) ResendVerificationEmail(ctx context.Context, email string)
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmail(email, user.ID)
+	go s.sendTokenCallbackEmailToUser(email, user.ID, constants.TokenTypeEmailVerification)
+
+	return nil
+}
+
+func (s *UserService) SendForgetPasswordEmail(ctx context.Context, email string) error {
+	user, err := s.user.GetByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, store.ErrUserNotFound) {
+			// don't reveal if user exists for security reasons
+			log.Printf("account with email: %s doesn't exist, no emails will be sent.", email)
+			return nil
+		}
+		return fmt.Errorf("failed to check user: %w", err)
+	}
+
+	// send password reset email in the background
+	go s.sendTokenCallbackEmailToUser(email, user.ID, constants.TokenTypePasswordReset)
 
 	return nil
 }
@@ -113,6 +125,33 @@ func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 	}
 
 	return nil
+}
+
+func (s *UserService) ResetPassword(ctx context.Context, tokenStr, newPassword string) error {
+	token, err := s.tokenService.ValidateToken(ctx, tokenStr, constants.TokenTypePasswordReset)
+	if err != nil {
+		return err
+	}
+
+	// check if user exists
+	_, err = s.user.GetById(ctx, token.UserID)
+	if err != nil {
+		return err
+	}
+
+	// create new password hash
+	hashedPassword, err := s.hashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// update user password
+	if err := s.user.UpdatePassword(ctx, token.UserID, hashedPassword); err != nil {
+		return err
+	}
+
+	return nil
+
 }
 
 func (s *UserService) LoginUser(ctx context.Context, details store.UserLoginDetails) (*TokenPair, error) {
@@ -157,36 +196,4 @@ func (s *UserService) AuthenticateUser(ctx context.Context, email, password stri
 	}
 
 	return user, nil
-}
-
-func (s *UserService) sendVerificationEmail(email string, userID int64) {
-	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
-	defer cancel()
-
-	token, err := s.tokenService.CreateVerificationToken(ctx, userID)
-	if err != nil {
-		log.Printf("failed to create verification token for user %d: %v", userID, err)
-		return
-	}
-
-	verificationLink := fmt.Sprintf("%s/verification?token=%s", s.frontendURL, token)
-
-	if err := s.httpClient.SendVerificationEmail(ctx, email, verificationLink); err != nil {
-		log.Printf("failed to send verification email to %s: %v", email, err)
-	} else {
-		log.Printf("verification email sent successfully to %s", email)
-	}
-}
-
-func (s *UserService) hashPassword(password string) (string, error) {
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", err
-	}
-	return string(hashedBytes), nil
-}
-
-func (s *UserService) verifyPassword(password, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	return err == nil
 }
