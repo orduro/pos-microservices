@@ -31,7 +31,7 @@ func (h *Handler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err := h.userService.ResendVerificationEmail(r.Context(), req.Email)
+	err := h.userService.SendEmailVerification(r.Context(), req.Email)
 	if err != nil {
 		if err.Error() == "user is already verified" {
 			json.WriteError(w, r, http.StatusConflict, err.Error())

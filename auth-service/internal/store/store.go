@@ -1,4 +1,3 @@
-// Update your auth-service/internal/store/store.go
 package store
 
 import (

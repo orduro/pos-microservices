@@ -24,6 +24,7 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// create user in system
 	user, err := h.userService.RegisterUser(r.Context(), registrationDetails)
 	if err != nil {
 		switch {
@@ -35,6 +36,18 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 			log.Printf("failed to register user: %v", err)
 			return
 		}
+	}
+
+	// send verification email
+	err = h.userService.SendEmailVerification(r.Context(), user.Email)
+	if err != nil {
+		if err.Error() == "user is already verified" {
+			json.WriteError(w, r, http.StatusConflict, err.Error())
+			return
+		}
+		json.WriteError(w, r, http.StatusInternalServerError, "failed to resend verification email")
+		log.Printf("failed to resend verification email: %v", err)
+		return
 	}
 
 	json.Write(w, http.StatusCreated, map[string]any{

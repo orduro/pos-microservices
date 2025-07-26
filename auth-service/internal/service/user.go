@@ -63,13 +63,10 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	// send verification email asynchronously
-	go s.sendVerificationEmailToUser(details.Email, user.ID)
-
 	return &user, nil
 }
 
-func (s *UserService) ResendVerificationEmail(ctx context.Context, email string) error {
+func (s *UserService) SendEmailVerification(ctx context.Context, email string) error {
 	user, err := s.user.GetByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, store.ErrUserNotFound) {
@@ -85,7 +82,7 @@ func (s *UserService) ResendVerificationEmail(ctx context.Context, email string)
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmailToUser(email, user.ID)
+	go s.sendVerificationEmailToUserAsync(email, user.ID, constants.TokenTypeEmailVerification)
 
 	return nil
 }

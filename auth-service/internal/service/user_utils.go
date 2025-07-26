@@ -9,11 +9,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *UserService) sendVerificationEmailToUser(email string, userID int64) {
+func (s *UserService) sendVerificationEmailToUserAsync(email string, userID int64, tokenType string) {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
 	defer cancel()
 
-	token, err := s.tokenService.CreateVerificationToken(ctx, userID)
+	token, err := s.tokenService.CreateVerificationToken(ctx, userID, tokenType)
 	if err != nil {
 		log.Printf("failed to create verification token for user %d: %v", userID, err)
 		return
