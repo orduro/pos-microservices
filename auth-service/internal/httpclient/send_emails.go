@@ -10,10 +10,10 @@ type EmailVerificationRequest struct {
 	VerificationURL string `json:"verification_url"`
 }
 
-func (c *Client) SendVerificationEmail(ctx context.Context, email, verificationURL string) error {
+func (c *Client) SendCallbackEmail(ctx context.Context, email, callbackURL string) error {
 	reqBody := EmailVerificationRequest{
 		Email:           email,
-		VerificationURL: verificationURL,
+		VerificationURL: callbackURL,
 	}
 
 	request := ServiceRequest{

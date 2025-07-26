@@ -9,19 +9,37 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *UserService) sendTokenCallbackEmailToUser(email string, userID int64, tokenType string) {
+// this function generates and stores a token for a user
+// then sends them an email with a link to the frontend
+// that includes their token in the url query string
+//
+// can currently be used for sending password reset and email verification
+// allowed modes:
+// - constants.TokenTypeEmailVerification:
+// - constants.TokenTypePasswordReset
+func (s *UserService) sendTokenCallbackEmailToUser(email string, userID int64, mode string) {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
 	defer cancel()
 
-	token, err := s.tokenService.CreateVerificationToken(ctx, userID, tokenType)
+	token, err := s.tokenService.CreateVerificationToken(ctx, userID, mode)
 	if err != nil {
 		log.Printf("failed to create verification token for user %d: %v", userID, err)
 		return
 	}
 
-	verificationLink := fmt.Sprintf("%s/verification?token=%s", s.frontendURL, token)
+	// check mode and determine callback link
+	callbackLink := ""
+	switch mode {
+	case constants.TokenTypeEmailVerification:
+		callbackLink = fmt.Sprintf("%s/verification?token=%s", s.frontendURL, token)
+	case constants.TokenTypePasswordReset:
+		callbackLink = fmt.Sprintf("%s/password-reset?token=%s", s.frontendURL, token)
+	default:
+		log.Printf("token callback email can't be sent, invalid mode: %v", mode)
+		return
+	}
 
-	if err := s.httpClient.SendVerificationEmail(ctx, email, verificationLink); err != nil {
+	if err := s.httpClient.SendCallbackEmail(ctx, email, callbackLink); err != nil {
 		log.Printf("failed to send verification email to %s: %v", email, err)
 	} else {
 		log.Printf("verification email sent successfully to %s", email)
