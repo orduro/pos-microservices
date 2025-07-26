@@ -56,7 +56,7 @@ func (r *ResendVerificationRequest) Validate() error {
 	return store.V.Struct(r)
 }
 
-func (h *Handler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) SendEmailVerification(w http.ResponseWriter, r *http.Request) {
 	var req ResendVerificationRequest
 	if err := json.Read(r, &req); err != nil {
 		json.WriteError(w, r, http.StatusBadRequest, "invalid json")

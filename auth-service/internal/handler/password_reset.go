@@ -19,7 +19,7 @@ func (f *ForgotPasswordRequest) Validate() error {
 	return store.V.Struct(f)
 }
 
-func (h *Handler) InitialiseForgotPassword(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) InitiatePasswordReset(w http.ResponseWriter, r *http.Request) {
 	// get email from request
 	var req ForgotPasswordRequest
 	if err := json.Read(r, &req); err != nil {
@@ -47,7 +47,7 @@ func (f *ForgotPasswordCallbackRequest) Validate() error {
 	return store.V.Struct(f)
 }
 
-func (h *Handler) ForgotPasswordCallback(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) PasswordResetCallback(w http.ResponseWriter, r *http.Request) {
 	// read token from URL
 	token := chi.URLParam(r, "token")
 	if token == "" {
