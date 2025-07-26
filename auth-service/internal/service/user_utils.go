@@ -17,11 +17,11 @@ import (
 // allowed modes:
 // - constants.TokenTypeEmailVerification:
 // - constants.TokenTypePasswordReset
-func (s *UserService) sendTokenCallbackEmailToUser(email string, userID int64, mode string) {
+func (s *UserService) sendTokenCallbackEmailToUser(email string, userID int64, tokenType string) {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
 	defer cancel()
 
-	token, err := s.tokenService.CreateVerificationToken(ctx, userID, mode)
+	token, err := s.tokenService.CreateToken(ctx, userID, tokenType)
 	if err != nil {
 		log.Printf("failed to create verification token for user %d: %v", userID, err)
 		return
@@ -29,20 +29,28 @@ func (s *UserService) sendTokenCallbackEmailToUser(email string, userID int64, m
 
 	// check mode and determine callback link
 	callbackLink := ""
-	switch mode {
+	switch tokenType {
 	case constants.TokenTypeEmailVerification:
 		callbackLink = fmt.Sprintf("%s/verification?token=%s", s.frontendURL, token)
+		if err := s.httpClient.SendVerificationEmail(ctx, email, callbackLink); err != nil {
+			log.Printf("failed to send verification email to %s: %v", email, err)
+		} else {
+			log.Printf("verification email sent successfully to %s", email)
+		}
+		return
+
 	case constants.TokenTypePasswordReset:
 		callbackLink = fmt.Sprintf("%s/password-reset?token=%s", s.frontendURL, token)
-	default:
-		log.Printf("token callback email can't be sent, invalid mode: %v", mode)
+		if err := s.httpClient.SendPasswordResetEmail(ctx, email, callbackLink); err != nil {
+			log.Printf("failed to send password reset email to %s: %v", email, err)
+		} else {
+			log.Printf("password reset email sent successfully to %s", email)
+		}
 		return
-	}
 
-	if err := s.httpClient.SendCallbackEmail(ctx, email, callbackLink); err != nil {
-		log.Printf("failed to send verification email to %s: %v", email, err)
-	} else {
-		log.Printf("verification email sent successfully to %s", email)
+	default:
+		log.Printf("token callback email can't be sent, invalid mode: %v", tokenType)
+		return
 	}
 }
 

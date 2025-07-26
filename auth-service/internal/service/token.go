@@ -28,7 +28,7 @@ func (s *TokenService) GenerateToken() (string, error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-func (s *TokenService) CreateVerificationToken(ctx context.Context, userID int64, tokenType string) (string, error) {
+func (s *TokenService) CreateToken(ctx context.Context, userID int64, tokenType string) (string, error) {
 	token, err := s.GenerateToken()
 	if err != nil {
 		return "", err

@@ -87,6 +87,23 @@ func (s *UserService) SendEmailVerification(ctx context.Context, email string) e
 	return nil
 }
 
+func (s *UserService) SendForgetPasswordEmail(ctx context.Context, email string) error {
+	user, err := s.user.GetByEmail(ctx, email)
+	if err != nil {
+		if errors.Is(err, store.ErrUserNotFound) {
+			// don't reveal if user exists for security reasons
+			log.Printf("account with email: %s doesn't exist, no emails will be sent.", email)
+			return nil
+		}
+		return fmt.Errorf("failed to check user: %w", err)
+	}
+
+	// send password reset email in the background
+	go s.sendTokenCallbackEmailToUser(email, user.ID, constants.TokenTypePasswordReset)
+
+	return nil
+}
+
 func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 	token, err := s.tokenService.ValidateToken(ctx, tokenStr, constants.TokenTypeEmailVerification)
 	if err != nil {
