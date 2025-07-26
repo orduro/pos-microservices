@@ -11,7 +11,7 @@ import (
 	"github.com/orduro/pos-microservices/auth-service/internal/store"
 )
 
-func (h *Handler) UserVerification(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UserVerificationCallback(w http.ResponseWriter, r *http.Request) {
 	// read token from URL
 	token := chi.URLParam(r, "token")
 	if token == "" {
