@@ -127,6 +127,33 @@ func (s *UserService) VerifyUser(ctx context.Context, tokenStr string) error {
 	return nil
 }
 
+func (s *UserService) ResetPassword(ctx context.Context, tokenStr, newPassword string) error {
+	token, err := s.tokenService.ValidateToken(ctx, tokenStr, constants.TokenTypePasswordReset)
+	if err != nil {
+		return err
+	}
+
+	// check if user exists
+	_, err = s.user.GetById(ctx, token.UserID)
+	if err != nil {
+		return err
+	}
+
+	// create new password hash
+	hashedPassword, err := s.hashPassword(newPassword)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	// update user password
+	if err := s.user.UpdatePassword(ctx, token.UserID, hashedPassword); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func (s *UserService) LoginUser(ctx context.Context, details store.UserLoginDetails) (*TokenPair, error) {
 	// authenticate user by checking email and password matches
 	user, err := s.AuthenticateUser(ctx, details.Email, details.Password)

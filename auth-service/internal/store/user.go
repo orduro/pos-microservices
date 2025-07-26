@@ -178,3 +178,29 @@ func (s *UserStore) UpdateLastLogin(ctx context.Context, userID int64) error {
 
 	return nil
 }
+
+func (s *UserStore) UpdatePassword(ctx context.Context, userID int64, hashedPassword string) error {
+	query := `
+	UPDATE users
+	SET password_hash = $1, updated_at = NOW()
+	WHERE id = $2
+	`
+
+	args := []any{hashedPassword, userID}
+
+	result, err := s.db.ExecContext(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
+}
