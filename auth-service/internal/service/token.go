@@ -34,7 +34,7 @@ func (s *TokenService) CreateToken(ctx context.Context, userID int64, tokenType 
 		return "", err
 	}
 
-	verificationToken := store.VerificationToken{
+	verificationToken := store.Token{
 		UserID:    userID,
 		Token:     token,
 		TokenType: tokenType,
@@ -54,7 +54,7 @@ func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int6
 		return "", err
 	}
 
-	resetToken := store.VerificationToken{
+	resetToken := store.Token{
 		UserID:    userID,
 		Token:     token,
 		TokenType: constants.TokenTypePasswordReset,
@@ -68,7 +68,7 @@ func (s *TokenService) CreatePasswordResetToken(ctx context.Context, userID int6
 	return token, nil
 }
 
-func (s *TokenService) ValidateToken(ctx context.Context, tokenStr, tokenType string) (*store.VerificationToken, error) {
+func (s *TokenService) ValidateToken(ctx context.Context, tokenStr, tokenType string) (*store.Token, error) {
 	token, err := s.token.GetByToken(ctx, tokenStr, tokenType)
 	if err != nil {
 		return nil, err

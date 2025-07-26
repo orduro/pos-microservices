@@ -41,8 +41,8 @@ type UserRepository interface {
 }
 
 type VerificationTokenRepository interface {
-	Create(ctx context.Context, token *VerificationToken) error
-	GetByToken(ctx context.Context, token string, tokenType string) (*VerificationToken, error)
+	Create(ctx context.Context, token *Token) error
+	GetByToken(ctx context.Context, token string, tokenType string) (*Token, error)
 	MarkAsUsed(ctx context.Context, tokenID int64) error
 	DeleteExpired(ctx context.Context) error
 }

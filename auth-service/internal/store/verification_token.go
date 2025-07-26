@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type VerificationToken struct {
+type Token struct {
 	ID        int64      `json:"id"`
 	UserID    int64      `json:"user_id"`
 	Token     string     `json:"token"`
@@ -21,7 +21,7 @@ type VerificationTokenStore struct {
 	db *sql.DB
 }
 
-func (s *VerificationTokenStore) Create(ctx context.Context, token *VerificationToken) error {
+func (s *VerificationTokenStore) Create(ctx context.Context, token *Token) error {
 	query := `
 		INSERT INTO verification_tokens (user_id, token, token_type, expires_at)
 		VALUES ($1, $2, $3, $4)
@@ -37,14 +37,14 @@ func (s *VerificationTokenStore) Create(ctx context.Context, token *Verification
 	return err
 }
 
-func (s *VerificationTokenStore) GetByToken(ctx context.Context, token string, tokenType string) (*VerificationToken, error) {
+func (s *VerificationTokenStore) GetByToken(ctx context.Context, token string, tokenType string) (*Token, error) {
 	query := `
 		SELECT id, user_id, token, token_type, expires_at, used_at, created_at, updated_at
 		FROM verification_tokens
 		WHERE token = $1 AND token_type = $2 AND used_at IS NULL
 	`
 
-	vt := &VerificationToken{}
+	vt := &Token{}
 	err := s.db.QueryRowContext(ctx, query, token, tokenType).Scan(
 		&vt.ID,
 		&vt.UserID,
