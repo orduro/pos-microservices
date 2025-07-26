@@ -82,7 +82,7 @@ func (s *UserService) SendEmailVerification(ctx context.Context, email string) e
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmailToUserAsync(email, user.ID, constants.TokenTypeEmailVerification)
+	go s.sendTokenCallbackEmailToUser(email, user.ID, constants.TokenTypeEmailVerification)
 
 	return nil
 }

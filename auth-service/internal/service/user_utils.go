@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *UserService) sendVerificationEmailToUserAsync(email string, userID int64, tokenType string) {
+func (s *UserService) sendTokenCallbackEmailToUser(email string, userID int64, tokenType string) {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
 	defer cancel()
 
