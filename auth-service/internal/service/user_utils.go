@@ -9,7 +9,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (s *UserService) sendVerificationEmail(email string, userID int64) {
+func (s *UserService) sendVerificationEmailToUser(email string, userID int64) {
 	ctx, cancel := context.WithTimeout(context.Background(), constants.ServiceCallTimeout)
 	defer cancel()
 

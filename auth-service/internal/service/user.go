@@ -64,7 +64,7 @@ func (s *UserService) RegisterUser(ctx context.Context, details store.UserRegist
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmail(details.Email, user.ID)
+	go s.sendVerificationEmailToUser(details.Email, user.ID)
 
 	return &user, nil
 }
@@ -85,7 +85,7 @@ func (s *UserService) ResendVerificationEmail(ctx context.Context, email string)
 	}
 
 	// send verification email asynchronously
-	go s.sendVerificationEmail(email, user.ID)
+	go s.sendVerificationEmailToUser(email, user.ID)
 
 	return nil
 }
