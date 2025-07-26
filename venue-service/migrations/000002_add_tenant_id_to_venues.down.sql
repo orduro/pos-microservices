@@ -11,8 +11,6 @@ WHERE id NOT IN (
     GROUP BY name, address
 );
 
--- Now we can safely add the old unique constraint
 ALTER TABLE venues ADD CONSTRAINT unique_venue_name_address UNIQUE (name, address);
 
--- Drop the tenant_id column
 ALTER TABLE venues DROP COLUMN IF EXISTS tenant_id;
