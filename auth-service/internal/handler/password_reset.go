@@ -37,6 +37,10 @@ func (h *Handler) InitiatePasswordReset(w http.ResponseWriter, r *http.Request) 
 		json.WriteError(w, r, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	json.Write(w, http.StatusOK, map[string]any{
+		"message": "Password reset email sent successfully",
+	})
 }
 
 type ForgotPasswordCallbackRequest struct {
@@ -91,5 +95,7 @@ func (h *Handler) PasswordResetCallback(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	w.WriteHeader(http.StatusOK)
+	json.Write(w, http.StatusOK, map[string]any{
+		"message": "Password reset successful",
+	})
 }
