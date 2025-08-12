@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS venues (
-   id SERIAL PRIMARY KEY,
+   id BIGSERIAL PRIMARY KEY,
    name TEXT NOT NULL,
    address TEXT NOT NULL,
    phone TEXT,
