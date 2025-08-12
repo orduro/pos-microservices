@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/orduro/common/json"
+	"github.com/orduro/pos-microservices/common/json"
 	"github.com/orduro/pos-microservices/communication-service/internal/store"
 )
 
