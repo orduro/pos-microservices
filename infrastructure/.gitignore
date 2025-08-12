@@ -1,0 +1,5 @@
+# ignore local terraform generated directories and files by cli
+.terraform/*
+.terraform.*
+
+
