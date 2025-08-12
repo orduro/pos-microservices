@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/orduro/common/json"
+	"github.com/orduro/pos-microservices/common/json"
 	"github.com/orduro/pos-microservices/venue/internal/store"
 )
 

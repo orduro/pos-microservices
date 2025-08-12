@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/orduro/common/auth"
+	"github.com/orduro/pos-microservices/common/auth"
 	"github.com/orduro/pos-microservices/venue/internal/database"
 )
 
