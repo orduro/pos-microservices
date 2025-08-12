@@ -7,13 +7,15 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/orduro/common/auth"
 	"github.com/orduro/pos-microservices/venue/internal/handler/health"
+	"github.com/orduro/pos-microservices/venue/internal/handler/item"
 	"github.com/orduro/pos-microservices/venue/internal/handler/venue"
 )
 
 func (s *server) mount() *chi.Mux {
 	// initialise handlers
-	healthhandler := health.New(s.config.Env)
-	venuehandler := venue.New(s.store)
+	healthHandler := health.New(s.config.Env)
+	venueHandler := venue.New(s.store)
+	itemHandler := item.New(s.store)
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -26,7 +28,7 @@ func (s *server) mount() *chi.Mux {
 	// processing should be stopped.
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/health", healthhandler.Check)
+	r.Get("/health", healthHandler.Check)
 
 	// prefix /api in front of all routes, all routes go in here
 	r.Route("/api", func(r chi.Router) {
@@ -35,22 +37,42 @@ func (s *server) mount() *chi.Mux {
 
 		// routes for /venue
 		r.Route("/venue", func(r chi.Router) {
-			r.Post("/", venuehandler.CreateVenue)
-			r.Get("/", venuehandler.ListVenues)
-			r.Patch("/{id}", venuehandler.UpdateVenue)
+			r.Post("/", venueHandler.CreateVenue)
+			r.Get("/", venueHandler.ListVenues)
+			r.Patch("/{id}", venueHandler.UpdateVenue)
 
 			// routes for venue archives `/venue/archive`
 			r.Route("/archive", func(r chi.Router) {
-				r.Put("/{id}", venuehandler.ArchiveVenue)
+				r.Put("/{id}", venueHandler.ArchiveVenue)
 			})
 
 			// routes for venue deletes `/venue/delete`
 			r.Route("/delete", func(r chi.Router) {
-				r.Delete("/{id}", venuehandler.DeleteVenue)
+				r.Delete("/{id}", venueHandler.DeleteVenue)
 			})
 
 			r.Route("/restore", func(r chi.Router) {
-				r.Patch("/{id}", venuehandler.RestoreVenue)
+				r.Patch("/{id}", venueHandler.RestoreVenue)
+			})
+		})
+
+		// routes for /item
+		r.Route("/items", func(r chi.Router) {
+			r.Post("/", itemHandler.CreateItem)
+			r.Get("/", itemHandler.ListItems)
+			r.Get("/{id}", itemHandler.GetItem)
+			r.Patch("/{id}", itemHandler.UpdateItem)
+
+			r.Route("/archive", func(r chi.Router) {
+				r.Put("/{id}", itemHandler.ArchiveItem)
+			})
+
+			r.Route("/delete", func(r chi.Router) {
+				r.Delete("/{id}", itemHandler.DeleteItem)
+			})
+
+			r.Route("/restore", func(r chi.Router) {
+				r.Patch("/{id}", itemHandler.RestoreItem)
 			})
 		})
 	})
