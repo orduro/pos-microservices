@@ -16,12 +16,11 @@ services:
     image: venue-service:latest
     container_name: venue-service-dev
     build:
-      args:
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
-      context: ./venue-service/
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: venue-service/Dockerfile.dev
     volumes:
-      - ./venue-service:/app
+      - ./venue-service:/app/venue-service
+      - ./common:/app/common
     environment:
       - SERVER_PORT=:8081
       - ENVIRONMENT=dev
@@ -43,12 +42,11 @@ services:
     image: auth-service:latest
     container_name: auth-service-dev
     build:
-      args:
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
-      context: ./auth-service/
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: auth-service/Dockerfile.dev
     volumes:
-      - ./auth-service:/app
+      - ./auth-service:/app/auth-service
+      - ./common:/app/common
     environment:
       - SERVER_PORT=:8082
       - ENVIRONMENT=dev
@@ -77,12 +75,11 @@ services:
     image: communication-service:latest
     container_name: communication-service-dev
     build:
-      args:
-        GITHUB_TOKEN: ${GITHUB_TOKEN}
-      context: ./communication-service/
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: communication-service/Dockerfile.dev
     volumes:
-      - ./communication-service:/app
+      - ./communication-service:/app/communication-service
+      - ./common:/app/common
     env_file:
       - ./communication-service/.env
     ports:
