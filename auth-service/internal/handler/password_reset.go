@@ -6,9 +6,9 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/orduro/common/json"
 	"github.com/orduro/pos-microservices/auth-service/internal/constants"
 	"github.com/orduro/pos-microservices/auth-service/internal/store"
+	"github.com/orduro/pos-microservices/common/json"
 )
 
 type ForgotPasswordRequest struct {

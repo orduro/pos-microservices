@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/orduro/common/auth"
+	"github.com/orduro/pos-microservices/common/auth"
 	"github.com/orduro/pos-microservices/venue/internal/handler/health"
 	"github.com/orduro/pos-microservices/venue/internal/handler/venue"
 )

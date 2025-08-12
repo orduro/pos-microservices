@@ -5,9 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/orduro/common/json"
 	"github.com/orduro/pos-microservices/auth-service/internal/constants"
 	"github.com/orduro/pos-microservices/auth-service/internal/store"
+	"github.com/orduro/pos-microservices/common/json"
 )
 
 func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {

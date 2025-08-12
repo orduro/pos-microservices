@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/orduro/common/auth"
+	"github.com/orduro/pos-microservices/common/auth"
 )
 
 type JWTService struct {
