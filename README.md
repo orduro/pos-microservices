@@ -1,6 +1,6 @@
 # POS Microservices System
 
-A production-ready Point of Sale/Venue management system built with Go microservices architecture, showcasing modern backend development practices and distributed system design.
+A Point of Sale/Venue management system built with Go microservices architecture, showcasing modern backend development practices and distributed system design.
 
 ## Architecture Overview
 
